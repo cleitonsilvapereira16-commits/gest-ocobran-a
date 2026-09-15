@@ -156,7 +156,6 @@
                 </div>
             </div>
 
-            <!-- FOOTER COM CRÉDITO DA EMPRESA CRIADORA -->
             <div class="pt-2 text-center">
                 <a href="https://csdevoficial.netlify.app/" target="_blank" rel="noopener noreferrer" class="text-[10px] font-mono text-slate-500 hover:text-[var(--color-primary)] transition-colors flex items-center justify-center gap-1.5">
                     <span>Desenvolvido por</span>
@@ -195,13 +194,11 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <!-- ALTERADOR DE CORES DA INTERFACE -->
             <button onclick="openModal('theme-modal')" class="px-3 py-2 bg-canvas hover:bg-card border border-custom-border text-slate-300 font-semibold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95" title="Personalizar Cores do Painel">
                 <i data-lucide="palette" class="w-3.5 h-3.5 text-[var(--color-primary)]"></i>
                 <span class="hidden sm:inline">Aparência</span>
             </button>
 
-            <!-- AÇÕES EXCLUSIVAS SUPERVISOR -->
             <div id="supervisor-actions" class="flex items-center gap-2 hidden">
                 <button onclick="openModal('company-modal')" class="px-3 py-2 bg-canvas hover:bg-card border border-[var(--color-primary)]/30 text-[var(--color-primary)] font-semibold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-glow-sm">
                     <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
@@ -232,8 +229,6 @@
 
     <!-- ÁREA PRINCIPAL -->
     <div class="flex-1 flex overflow-hidden">
-        
-        <!-- SIDEBAR DE PERFORMANCE -->
         <aside class="w-80 glass-panel border-r border-custom-border p-5 flex flex-col justify-between shrink-0 overflow-y-auto">
             <div class="space-y-5">
                 <div class="p-4 rounded-2xl glass-card relative overflow-hidden">
@@ -247,7 +242,6 @@
                     <div id="operator-display-role" class="text-xs text-slate-400 font-medium mt-0.5">Setor de Cobrança & Financeiro</div>
                 </div>
 
-                <!-- PROGRESSO -->
                 <div class="space-y-3 p-4 rounded-2xl glass-card">
                     <div class="flex justify-between items-center text-xs">
                         <span class="text-slate-400 font-medium flex items-center gap-1.5">
@@ -302,17 +296,13 @@
                 </div>
             </div>
 
-            <!-- EMBEDDED FOOTER DA SOFTWARE HOUSE -->
             <div class="pt-4 border-t border-custom-border text-[10px] font-mono text-slate-500 text-center space-y-1">
                 <p>CS DEV Solutions OS v3.5</p>
                 <a href="https://csdevoficial.netlify.app/" target="_blank" rel="noopener noreferrer" class="text-[10px] text-[var(--color-primary)] hover:underline block font-bold">https://csdevoficial.netlify.app/</a>
             </div>
         </aside>
 
-        <!-- DATA CANVAS & TABELA -->
         <main class="flex-1 flex flex-col bg-canvas overflow-hidden p-6 space-y-4 relative">
-            
-            <!-- STATS COUNTERS -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
                     <div>
@@ -355,7 +345,6 @@
                 </div>
             </div>
 
-            <!-- CONTROLES DA TABELA -->
             <div class="flex items-center justify-between gap-4">
                 <div class="relative flex-1 max-w-md">
                     <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
@@ -379,7 +368,6 @@
                 </div>
             </div>
 
-            <!-- TABELA ESTILO OPERATING SYSTEM -->
             <div class="flex-1 glass-panel rounded-2xl overflow-auto border border-custom-border shadow-2xl relative">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead class="bg-canvas/90 backdrop-blur border-b border-custom-border sticky top-0 z-10 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
@@ -391,7 +379,7 @@
         </main>
     </div>
 
-    <!-- MODAL CUSTOMIZADOR DE CORES DA INTERFACE -->
+    <!-- MODAIS -->
     <div id="theme-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
         <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-md space-y-5 shadow-2xl">
             <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
@@ -446,7 +434,6 @@
         </div>
     </div>
 
-    <!-- MODAL EMPRESA / NOME FANTASIA -->
     <div id="company-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
         <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-md space-y-5 shadow-2xl">
             <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
@@ -474,7 +461,6 @@
         </div>
     </div>
 
-    <!-- MODAL IMPORTAÇÃO CSV / XLS -->
     <div id="import-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
         <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-lg space-y-5 shadow-2xl">
             <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
@@ -521,7 +507,6 @@
         </div>
     </div>
 
-    <!-- MODAL GERENCIADOR DE COLUNAS -->
     <div id="column-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
         <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-md space-y-5 shadow-2xl">
             <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
@@ -551,7 +536,6 @@
         </div>
     </div>
 
-    <!-- MODAL RELATÓRIO -->
     <div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
         <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-lg space-y-5 shadow-2xl">
             <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
@@ -636,11 +620,27 @@
             { id: 104, operator: 'financeiro_lorena', prioridade: 'NORMAL', dataAbertura: '15/09/2026', cliente: 'ANA CLARA SILVA COSTA', contato: '(61) 99999-8888', revertido: 'NÃO', etapa: 'Em dias', statusSLA: 'NO PRAZO', finalizado: false }
         ];
 
+        function saveDataset() {
+            localStorage.setItem('csdev_dataset', JSON.stringify(dataset));
+        }
+
+        function loadDataset() {
+            const saved = localStorage.getItem('csdev_dataset');
+            if (saved) {
+                try {
+                    dataset = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Erro ao carregar dados salvos:", e);
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('import-date').value = today;
             
-            // Carregar tema salvo
+            loadDataset();
+
             const savedPrimary = localStorage.getItem('csdev_theme_primary');
             const savedAccent = localStorage.getItem('csdev_theme_accent');
             if(savedPrimary && savedAccent) {
@@ -859,6 +859,7 @@
                             td.textContent = row[col.id] || '-';
                             td.onblur = (e) => {
                                 row[col.id] = e.target.textContent;
+                                saveDataset();
                             };
                         }
 
@@ -886,6 +887,7 @@
             const item = dataset.find(i => i.id === id);
             if(item) {
                 item[field] = value;
+                saveDataset();
                 renderTable();
             }
         }
@@ -894,6 +896,7 @@
             const item = dataset.find(i => i.id === id);
             if(item) {
                 item.finalizado = !item.finalizado;
+                saveDataset();
                 renderTable();
             }
         }
@@ -901,6 +904,7 @@
         function deleteRow(id) {
             if(confirm('Confirmar exclusão deste registro?')) {
                 dataset = dataset.filter(i => i.id !== id);
+                saveDataset();
                 renderTable();
             }
         }
@@ -938,6 +942,21 @@
                     return;
                 }
 
+                function findValue(row, keywords) {
+                    const keys = Object.keys(row);
+                    for (let key of keys) {
+                        const cleanKey = key.toLowerCase()
+                            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                            .trim();
+                        for (let kw of keywords) {
+                            if (cleanKey.includes(kw)) {
+                                return row[key];
+                            }
+                        }
+                    }
+                    return null;
+                }
+
                 let operatorToggle = 0;
 
                 json.forEach((item, idx) => {
@@ -949,21 +968,30 @@
 
                     let defaultDate = dateVal ? dateVal.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
 
+                    const clienteNome = findValue(item, ['cliente', 'nome', 'razao', 'devedor', 'sacado', 'empresa']) || 'CLIENTE NÃO IDENTIFICADO';
+                    const dataAbertura = findValue(item, ['data', 'dt', 'abertura', 'vencimento']) || defaultDate;
+                    const prioridade = findValue(item, ['prioridade', 'prio', 'urgencia']) || 'NORMAL';
+                    const etapa = findValue(item, ['etapa', 'fase', 'status']) || 'Etapa 1';
+                    const modalidade = (findValue(item, ['modalidade', 'segmento', 'tipo', 'caixa']) || 'caixa').toString().toLowerCase();
+                    const contato = findValue(item, ['telefone', 'contato', 'celular', 'fone', 'tel']) || '-';
+                    const revertido = findValue(item, ['revertido', 'pago', 'acordo']) || 'NÃO';
+
                     dataset.push({
                         id: Date.now() + idx,
                         operator: assignedOperator,
-                        prioridade: item['Prioridade'] || 'NORMAL',
-                        dataAbertura: item['Data'] || defaultDate,
-                        cliente: item['Cliente'] || item['Nome'] || 'CLIENTE NÃO IDENTIFICADO',
-                        etapa: item['Etapa'] || 'Etapa 1',
-                        statusSLA: item['SLA'] || 'NO PRAZO',
-                        modalidade: (item['Modalidade'] || 'caixa').toLowerCase(),
-                        contato: item['Telefone'] || item['Contato'] || '-',
-                        revertido: item['Revertido'] || 'NÃO',
+                        prioridade: prioridade,
+                        dataAbertura: dataAbertura,
+                        cliente: clienteNome,
+                        etapa: etapa,
+                        statusSLA: 'NO PRAZO',
+                        modalidade: modalidade,
+                        contato: contato,
+                        revertido: revertido,
                         finalizado: false
                     });
                 });
 
+                saveDataset();
                 closeModal('import-modal');
                 renderTable();
             };
