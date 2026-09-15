@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão Operacional & Cobrança — CS DEV</title>
+    <title>CS DEV Solutions — Operating System AI</title>
     
     <!-- TAILWIND CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,17 +13,21 @@
             theme: {
                 extend: {
                     colors: {
-                        canvas: '#0D0E12',
-                        card: '#16181E',
-                        'card-hover': '#1F222A',
-                        'custom-border': '#2A2D3A',
-                        brand: {
-                            blue: '#3B82F6',
-                            green: '#10B981',
-                            purple: '#8B5CF6',
-                            amber: '#F59E0B',
-                            rose: '#F43F5E'
+                        canvas: '#06080D',
+                        card: '#0D111A',
+                        'card-hover': '#141A26',
+                        'custom-border': '#1E2638',
+                        ai: {
+                            cyan: '#00F0FF',
+                            violet: '#7000FF',
+                            pink: '#FF007A',
+                            emerald: '#10B981'
                         }
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 20px -5px rgba(0, 240, 255, 0.3)',
+                        'neon-violet': '0 0 20px -5px rgba(112, 0, 255, 0.3)',
+                        'glow-sm': '0 0 10px rgba(0, 240, 255, 0.15)'
                     }
                 }
             }
@@ -37,37 +41,43 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
         
         body {
-            background-color: #0D0E12;
-            color: #E2E8F0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #06080D;
+            color: #CBD5E1;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0D0E12;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2A2D3A;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #3B82F6;
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #06080D; }
+        ::-webkit-scrollbar-thumb { background: #1E2638; border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
+
+        .glass-panel {
+            background: rgba(13, 17, 26, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(30, 38, 56, 0.8);
         }
 
-        .editable-cell {
-            transition: all 0.2s ease;
+        .glass-card {
+            background: linear-gradient(135deg, rgba(20, 26, 38, 0.6) 0%, rgba(13, 17, 26, 0.8) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
+
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 20px -5px rgba(0, 240, 255, 0.15);
+        }
+
+        .editable-cell { transition: all 0.2s ease; }
         .editable-cell:focus {
             outline: none;
-            background-color: #1F222A;
-            box-shadow: inset 0 0 0 2px #3B82F6;
+            background-color: #141A26;
+            box-shadow: inset 0 0 0 1px #00F0FF;
         }
 
         .badge-status {
@@ -75,219 +85,252 @@
             align-items: center;
             gap: 0.375rem;
             padding: 0.3rem 0.65rem;
-            border-radius: 0.375rem;
-            font-size: 0.6875rem;
+            border-radius: 0.5rem;
+            font-size: 0.65rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
             white-space: nowrap;
         }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden bg-canvas text-slate-200">
+<body class="h-screen flex flex-col overflow-hidden bg-canvas text-slate-300">
 
-    <!-- TELA DE LOGIN / PIN -->
-    <div id="login-screen" class="fixed inset-0 bg-canvas z-50 flex items-center justify-center p-4">
-        <div class="bg-card border border-custom-border p-8 rounded-2xl w-full max-w-md space-y-6 shadow-2xl">
+    <!-- TELA DE LOGIN / WORKSPACE AI INITIALIZER -->
+    <div id="login-screen" class="fixed inset-0 bg-canvas/95 backdrop-blur-2xl z-50 flex items-center justify-center p-4">
+        <!-- Luz de Fundo AI -->
+        <div class="absolute w-[500px] h-[500px] bg-ai-cyan/10 rounded-full blur-[140px] pointer-events-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute w-[300px] h-[300px] bg-ai-violet/15 rounded-full blur-[100px] pointer-events-none top-1/3 left-1/2 -translate-x-1/2"></div>
+
+        <div class="glass-panel p-8 rounded-3xl w-full max-w-md space-y-6 shadow-2xl relative z-10 border border-custom-border/80">
             <div class="text-center space-y-2">
-                <div class="inline-flex p-3 bg-blue-600/20 text-blue-400 rounded-2xl border border-blue-500/30 mb-2">
-                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                <div class="inline-flex p-3 bg-ai-cyan/10 text-ai-cyan rounded-2xl border border-ai-cyan/20 mb-1 shadow-neon-cyan">
+                    <i data-lucide="cpu" class="w-8 h-8"></i>
                 </div>
-                <h2 class="text-xl font-bold text-white tracking-wide">Acesso ao Sistema CS DEV</h2>
-                <p class="text-xs text-slate-400">Selecione seu usuário para acessar o painel</p>
+                <div class="flex items-center justify-center gap-2">
+                    <span class="text-xs font-mono tracking-widest text-ai-cyan uppercase font-bold">Workspace OS</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-ai-cyan animate-ping"></span>
+                </div>
+                <h2 id="display-company-title" class="text-2xl font-black text-white tracking-wide">CS DEV Solutions</h2>
+                <p class="text-xs text-slate-400">Acesse com seu ID de Agente ou Chave Master</p>
             </div>
 
             <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Usuário / Perfil</label>
-                    <select id="login-user" onchange="togglePinInput()" class="w-full bg-canvas border border-custom-border rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                        <option value="cobranca_ludmila">Ludmila (Cobrança)</option>
-                        <option value="cobranca_lucas">Lucas (Cobrança)</option>
-                        <option value="financeiro_lorena">Lorena (Financeiro)</option>
-                        <option value="supervisor">Supervisor / Master (Acesso Restrito)</option>
-                    </select>
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider block">ID de Autenticação</label>
+                    <div class="relative">
+                        <i data-lucide="fingerprint" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ai-cyan"></i>
+                        <input type="password" id="login-input" placeholder="Insira seu ID de operador ou código" class="w-full bg-canvas/90 border border-custom-border rounded-xl pl-10 pr-4 py-3 text-xs text-slate-100 focus:outline-none focus:border-ai-cyan focus:ring-1 focus:ring-ai-cyan transition-all font-mono">
+                    </div>
                 </div>
 
-                <div id="pin-container" class="hidden">
-                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">PIN de Segurança (Supervisor)</label>
-                    <input type="password" id="login-pin" maxlength="4" placeholder="Digite o PIN de 4 dígitos" class="w-full bg-canvas border border-custom-border rounded-xl p-3 text-xs text-center tracking-widest text-white text-lg focus:outline-none focus:border-blue-500">
-                </div>
-
-                <button onclick="handleLogin()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="log-in" class="w-4 h-4"></i>
-                    <span>Entrar no Painel</span>
+                <button onclick="handleLogin()" class="w-full py-3.5 bg-gradient-to-r from-ai-cyan to-blue-600 hover:from-ai-cyan/90 hover:to-blue-500 text-black font-extrabold text-xs rounded-xl shadow-neon-cyan transition-all flex items-center justify-center gap-2 tracking-wider uppercase">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    <span>Iniciar Sessão</span>
                 </button>
+            </div>
+
+            <div class="pt-4 border-t border-custom-border/60 text-center space-y-2">
+                <p class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">Agentes Autorizados</p>
+                <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                    <div class="p-2 bg-canvas/60 border border-custom-border rounded-xl text-slate-300">
+                        Josué: <span class="text-ai-cyan font-bold">158</span>
+                    </div>
+                    <div class="p-2 bg-canvas/60 border border-custom-border rounded-xl text-slate-300">
+                        Lorena: <span class="text-ai-cyan font-bold">125</span>
+                    </div>
+                    <div class="p-2 bg-canvas/60 border border-custom-border rounded-xl text-slate-300">
+                        Ludmila: <span class="text-ai-cyan font-bold">122</span>
+                    </div>
+                    <div class="p-2 bg-canvas/60 border border-custom-border rounded-xl text-slate-300">
+                        Lucas: <span class="text-ai-cyan font-bold">164</span>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-500 font-mono mt-1">Supervisor Master: <span class="text-ai-violet font-bold">'2522'</span></p>
             </div>
         </div>
     </div>
 
-    <!-- HEADER / TOPBAR NAVIGATION MASTER -->
-    <header class="h-16 bg-card border-b border-custom-border px-6 flex items-center justify-between shrink-0 z-20 shadow-xl">
+    <!-- HEADER / AI WORKSPACE NAVIGATION -->
+    <header class="h-16 glass-panel px-6 flex items-center justify-between shrink-0 z-20 border-b border-custom-border">
         <div class="flex items-center gap-6">
             <div class="flex items-center gap-3">
-                <div class="p-2 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30 shadow-inner">
-                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                <div class="p-2 bg-ai-cyan/10 text-ai-cyan rounded-xl border border-ai-cyan/30 shadow-neon-cyan">
+                    <i data-lucide="bot" class="w-5 h-5"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-base text-white tracking-wide leading-none flex items-center gap-2">
-                        CS DEV <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-mono font-semibold">ENTERPRISE v3.6</span>
+                    <h1 id="header-company-name" class="font-bold text-sm text-white tracking-wide leading-none flex items-center gap-2">
+                        CS DEV Solutions
+                        <span id="role-badge" class="px-2 py-0.5 text-[9px] font-mono font-bold rounded-md bg-ai-cyan/10 text-ai-cyan border border-ai-cyan/20 uppercase">AI Workspace</span>
                     </h1>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Painel Operacional de Recuperação & Gestão BI</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Cockpit Operacional & Analytics BI</p>
                 </div>
             </div>
 
-            <div class="h-8 w-px bg-custom-border hidden md:block"></div>
+            <div class="h-6 w-px bg-custom-border hidden md:block"></div>
 
-            <nav id="nav-operators-container" class="flex gap-1.5 bg-canvas p-1 rounded-xl border border-custom-border text-xs">
-                <button onclick="switchOperator('cobranca_ludmila')" id="nav-cobranca_ludmila" class="nav-tab px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
-                    <i data-lucide="user-check" class="w-4 h-4"></i>
-                    <span>Painel Ludmila</span>
-                </button>
-                <button onclick="switchOperator('cobranca_lucas')" id="nav-cobranca_lucas" class="nav-tab px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
-                    <i data-lucide="user-check" class="w-4 h-4"></i>
-                    <span>Painel Lucas</span>
-                </button>
-                <button onclick="switchOperator('financeiro_lorena')" id="nav-financeiro_lorena" class="nav-tab px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
-                    <i data-lucide="wallet" class="w-4 h-4"></i>
-                    <span>Painel Lorena (Financeiro)</span>
-                </button>
+            <nav id="nav-operators-container" class="flex gap-1.5 bg-canvas/80 p-1 rounded-xl border border-custom-border text-xs">
+                <button onclick="switchOperator('cobranca_ludmila')" id="nav-cobranca_ludmila" class="nav-tab px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">Ludmila (Cob.)</button>
+                <button onclick="switchOperator('cobranca_lucas')" id="nav-cobranca_lucas" class="nav-tab px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">Lucas (Cob.)</button>
+                <button onclick="switchOperator('cobranca_josue')" id="nav-cobranca_josue" class="nav-tab px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">Josué (Cob.)</button>
+                <button onclick="switchOperator('financeiro_lorena')" id="nav-financeiro_lorena" class="nav-tab px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">Lorena (Fin.)</button>
+                <button onclick="switchOperator('financeiro_josue')" id="nav-financeiro_josue" class="nav-tab px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">Josué (Fin.)</button>
             </nav>
         </div>
 
         <div class="flex items-center gap-3">
-            <div id="supervisor-actions" class="flex items-center gap-3">
-                <button onclick="openModal('import-modal')" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95">
-                    <i data-lucide="file-up" class="w-4 h-4"></i>
-                    <span>Subir Demanda (CSV/XLS)</span>
+            <div id="supervisor-actions" class="flex items-center gap-2">
+                <button onclick="openModal('company-modal')" class="px-3 py-2 bg-canvas hover:bg-card border border-ai-cyan/30 text-ai-cyan font-semibold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-glow-sm">
+                    <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+                    <span>Whitelabel</span>
                 </button>
 
-                <button onclick="openModal('column-modal')" class="px-3.5 py-2 bg-canvas hover:bg-card border border-custom-border text-slate-300 font-semibold text-xs rounded-lg flex items-center gap-2 transition-all active:scale-95">
-                    <i data-lucide="columns-3" class="w-4 h-4 text-purple-400"></i>
-                    <span>Gerenciar Colunas</span>
+                <button onclick="openModal('import-modal')" class="px-3 py-2 bg-gradient-to-r from-ai-cyan to-blue-600 hover:opacity-90 text-black font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all shadow-neon-cyan active:scale-95">
+                    <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
+                    <span>Carga CSV/XLS</span>
+                </button>
+
+                <button onclick="openModal('column-modal')" class="px-3 py-2 bg-canvas hover:bg-card border border-custom-border text-slate-300 font-semibold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95">
+                    <i data-lucide="sliders" class="w-3.5 h-3.5 text-ai-violet"></i>
+                    <span>Colunas</span>
                 </button>
             </div>
 
-            <button onclick="generateDailyReport()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-emerald-600/20 active:scale-95">
-                <i data-lucide="file-text" class="w-4 h-4"></i>
+            <button onclick="generateDailyReport()" class="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95">
+                <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
                 <span>Gerar Relatório</span>
             </button>
 
-            <button onclick="logout()" class="p-2 bg-canvas hover:bg-card border border-custom-border text-slate-400 hover:text-rose-400 rounded-lg transition-all" title="Sair do Sistema">
-                <i data-lucide="log-out" class="w-4 h-4"></i>
+            <button onclick="logout()" class="p-2 bg-canvas hover:bg-card border border-custom-border text-slate-400 hover:text-rose-400 rounded-xl transition-all" title="Sair da Sessão">
+                <i data-lucide="power" class="w-4 h-4"></i>
             </button>
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL CANVAS -->
+    <!-- ÁREA PRINCIPAL WORKSPACE -->
     <div class="flex-1 flex overflow-hidden">
         
-        <!-- SIDEBAR DE PERFORMANCE E INSTRUÇÕES -->
-        <aside class="w-80 bg-card border-r border-custom-border p-5 flex flex-col justify-between shrink-0 overflow-y-auto">
-            <div class="space-y-6">
-                <div class="p-4 bg-canvas rounded-2xl border border-custom-border relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none"></div>
-                    <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Painel Individual em Uso</div>
-                    <div id="operator-display-name" class="text-xl font-bold text-white mt-1 flex items-center gap-2">
-                        Ludmila
+        <!-- SIDEBAR DE PERFORMANCE E REGRAS -->
+        <aside class="w-80 glass-panel border-r border-custom-border p-5 flex flex-col justify-between shrink-0 overflow-y-auto">
+            <div class="space-y-5">
+                <div class="p-4 rounded-2xl glass-card relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-28 h-28 bg-ai-cyan/10 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="text-[10px] font-mono text-ai-cyan uppercase font-bold tracking-wider flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-ai-cyan"></span> Agente Ativo
                     </div>
-                    <div id="operator-display-role" class="text-xs text-blue-400 font-medium mt-0.5">Setor de Cobrança & Recuperação</div>
+                    <div id="operator-display-name" class="text-xl font-extrabold text-white mt-1">
+                        Josué
+                    </div>
+                    <div id="operator-display-role" class="text-xs text-slate-400 font-medium mt-0.5">Setor de Cobrança & Financeiro</div>
                 </div>
 
-                <div class="space-y-3 p-4 bg-canvas rounded-2xl border border-custom-border">
+                <!-- METRICA DE METAS E PROGRESSO AI -->
+                <div class="space-y-3 p-4 rounded-2xl glass-card">
                     <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-400 font-medium">Progresso da Carteira</span>
-                        <span id="op-progress-percent" class="text-blue-400 font-bold text-sm">0%</span>
+                        <span class="text-slate-400 font-medium flex items-center gap-1.5">
+                            <i data-lucide="target" class="w-3.5 h-3.5 text-ai-cyan"></i> Eficiência da Carteira
+                        </span>
+                        <span id="op-progress-percent" class="text-ai-cyan font-mono font-bold text-sm">0%</span>
                     </div>
-                    <div class="w-full h-2.5 bg-card rounded-full overflow-hidden border border-custom-border">
-                        <div id="op-progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-emerald-500 transition-all duration-500" style="width: 0%"></div>
+                    <div class="w-full h-2 bg-canvas rounded-full overflow-hidden border border-custom-border">
+                        <div id="op-progress-bar" class="h-full bg-gradient-to-r from-ai-cyan via-blue-500 to-ai-violet transition-all duration-500" style="width: 0%"></div>
                     </div>
                     <div class="flex justify-between items-center text-[11px] text-slate-500 font-mono pt-1">
-                        <span>Demandas Concluídas</span>
-                        <span id="op-progress-count" class="font-bold text-slate-300">0 / 0</span>
+                        <span>Concluídos</span>
+                        <span id="op-progress-count" class="font-bold text-slate-200">0 / 0</span>
                     </div>
                 </div>
 
-                <div id="panel-lorena-rules" class="hidden space-y-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-                    <div class="flex items-center gap-2 text-amber-400 text-xs font-bold">
-                        <i data-lucide="shield-alert" class="w-4 h-4"></i> Regras Financeiras Vigentes
+                <div id="panel-lorena-rules" class="hidden space-y-3 p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
+                    <div class="flex items-center gap-2 text-amber-400 text-xs font-bold font-mono">
+                        <i data-lucide="shield-alert" class="w-4 h-4"></i> DIRETRIZES DE RENEGOCIAÇÃO
                     </div>
-                    <ul class="text-[11px] text-amber-200/80 space-y-2 list-disc list-inside leading-relaxed">
-                        <li><strong>Até 2 parcelas em atraso:</strong> Desconto máximo de até 30% à vista.</li>
-                        <li><strong>3 ou mais parcelas:</strong> Desconto de até 60% à vista.</li>
-                        <li><strong>Histórico positivo:</strong> Liberado flexibilização na alça de entrada.</li>
-                        <li><strong>Casos críticos:</strong> Encaminhar diretamente para análise Master.</li>
+                    <ul class="text-[11px] text-slate-300 space-y-2 leading-relaxed">
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-400 font-bold">•</span>
+                            <span>Até 2 parcelas em atraso: Desconto máximo de até 30% à vista.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-400 font-bold">•</span>
+                            <span>3 ou mais parcelas: Desconto de até 60% à vista.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-400 font-bold">•</span>
+                            <span>Casos críticos: Encaminhar para análise Master do Supervisor.</span>
+                        </li>
                     </ul>
                 </div>
 
-                <div id="panel-cobranca-filters" class="space-y-3">
-                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
-                        <span>Filtrar por Modalidade</span>
-                        <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-500"></i>
+                <div id="panel-cobranca-filters" class="space-y-2">
+                    <div class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between px-1">
+                        <span>Segmentação</span>
+                        <i data-lucide="filter" class="w-3 h-3 text-ai-cyan"></i>
                     </div>
                     <div class="space-y-1.5">
-                        <button onclick="filterModalidade('todos')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas border border-custom-border text-slate-200 hover:border-blue-500/50 transition-all flex items-center justify-between">
+                        <button onclick="filterModalidade('todos')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas/80 border border-custom-border text-slate-200 hover:border-ai-cyan/50 transition-all flex items-center justify-between">
                             <span>Todos os Registros</span>
-                            <span id="badge-count-todos" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">0</span>
+                            <span id="badge-count-todos" class="text-[10px] font-mono bg-card text-slate-400 px-2 py-0.5 rounded-md border border-custom-border">0</span>
                         </button>
-                        <button onclick="filterModalidade('caixa')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
+                        <button onclick="filterModalidade('caixa')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas/80 border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
                             <span>Caixa</span>
-                            <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-semibold">Ativo</span>
+                            <span class="text-[10px] font-mono bg-ai-cyan/10 text-ai-cyan border border-ai-cyan/20 px-2 py-0.5 rounded-md font-bold">Ativo</span>
                         </button>
-                        <button onclick="filterModalidade('agendamento')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
+                        <button onclick="filterModalidade('agendamento')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas/80 border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
                             <span>Agendamentos</span>
-                            <span class="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-full font-semibold">Promessa</span>
+                            <span class="text-[10px] font-mono bg-ai-violet/10 text-ai-violet border border-ai-violet/20 px-2 py-0.5 rounded-md font-bold">Promessa</span>
                         </button>
-                        <button onclick="filterModalidade('novas')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
+                        <button onclick="filterModalidade('novas')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas/80 border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
                             <span>Novas Cobranças</span>
-                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-semibold">Entrantes</span>
+                            <span class="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md font-bold">Entrantes</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="pt-6 border-t border-custom-border text-[11px] text-slate-500 text-center font-mono">
-                CS DEV Framework • Operational System
+            <div class="pt-4 border-t border-custom-border text-[10px] font-mono text-slate-500 text-center">
+                CS DEV Framework v3.0 • AI Core
             </div>
         </aside>
 
-        <!-- DATA CANVAS & TABELA DEDICADA -->
-        <main class="flex-1 flex flex-col bg-canvas overflow-hidden p-6 space-y-4">
+        <!-- DATA CANVAS & TABELA -->
+        <main class="flex-1 flex flex-col bg-canvas overflow-hidden p-6 space-y-4 relative">
             
+            <!-- STATS COUNTERS -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="p-4 bg-card border border-custom-border rounded-2xl flex items-center justify-between shadow-lg">
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
                     <div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Demandas Atribuídas</div>
-                        <div id="kpi-total" class="text-2xl font-extrabold text-white mt-1">0</div>
+                        <div class="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Demandas Alocadas</div>
+                        <div id="kpi-total" class="text-2xl font-black text-white mt-0.5 font-mono">0</div>
                     </div>
                     <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
                         <i data-lucide="layers" class="w-5 h-5"></i>
                     </div>
                 </div>
 
-                <div class="p-4 bg-card border border-custom-border rounded-2xl flex items-center justify-between shadow-lg">
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
                     <div>
-                        <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Demandas No Prazo</div>
-                        <div id="kpi-noprazo" class="text-2xl font-extrabold text-emerald-400 mt-1">0</div>
+                        <div class="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">Dentro do SLA</div>
+                        <div id="kpi-noprazo" class="text-2xl font-black text-emerald-400 mt-0.5 font-mono">0</div>
                     </div>
                     <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
                         <i data-lucide="check-circle-2" class="w-5 h-5"></i>
                     </div>
                 </div>
 
-                <div class="p-4 bg-card border border-custom-border rounded-2xl flex items-center justify-between shadow-lg">
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
                     <div>
-                        <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Atenção / Risco</div>
-                        <div id="kpi-atencao" class="text-2xl font-extrabold text-amber-400 mt-1">0</div>
+                        <div class="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">Atenção / Risco</div>
+                        <div id="kpi-atencao" class="text-2xl font-black text-amber-400 mt-0.5 font-mono">0</div>
                     </div>
                     <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
                         <i data-lucide="alert-triangle" class="w-5 h-5"></i>
                     </div>
                 </div>
 
-                <div class="p-4 bg-card border border-custom-border rounded-2xl flex items-center justify-between shadow-lg">
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
                     <div>
-                        <div class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Prazo Esgotado / Crítico</div>
-                        <div id="kpi-esgotado" class="text-2xl font-extrabold text-rose-400 mt-1">0</div>
+                        <div class="text-[10px] font-mono font-bold text-rose-400 uppercase tracking-wider">SLA Estourado</div>
+                        <div id="kpi-esgotado" class="text-2xl font-black text-rose-400 mt-0.5 font-mono">0</div>
                     </div>
                     <div class="p-3 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20">
                         <i data-lucide="clock" class="w-5 h-5"></i>
@@ -295,15 +338,16 @@
                 </div>
             </div>
 
+            <!-- CONTROLES DA TABELA -->
             <div class="flex items-center justify-between gap-4">
                 <div class="relative flex-1 max-w-md">
                     <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                    <input type="text" id="search-input" onkeyup="renderTable()" placeholder="Buscar cliente por nome..." class="w-full bg-card border border-custom-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-all shadow-inner">
+                    <input type="text" id="search-input" onkeyup="renderTable()" placeholder="Filtrar por nome do cliente ou parâmetro..." class="w-full bg-card/80 border border-custom-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-ai-cyan transition-all font-sans">
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <select id="filter-sla" onchange="renderTable()" class="bg-card border border-custom-border text-slate-300 text-xs rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 shadow-sm font-medium">
-                        <option value="todos">Todos os Status SLA / Prazo</option>
+                    <select id="filter-sla" onchange="renderTable()" class="bg-card border border-custom-border text-slate-300 text-xs rounded-xl px-4 py-2.5 focus:outline-none focus:border-ai-cyan font-mono">
+                        <option value="todos">Todos os Status SLA</option>
                         <option value="NO PRAZO">🟢 NO PRAZO</option>
                         <option value="ATENÇÃO">🟡 ATENÇÃO</option>
                         <option value="CUIDADO PRAZO ESTOURANDO">🟧 CUIDADO PRAZO ESTOURANDO</option>
@@ -314,97 +358,134 @@
                         <option value="SLA">🟪 SLA</option>
                     </select>
 
-                    <button onclick="renderTable()" class="p-2.5 bg-card hover:bg-card-hover border border-custom-border text-slate-300 rounded-xl transition-all" title="Atualizar Tabela">
-                        <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                    <button onclick="renderTable()" class="p-2.5 bg-card hover:bg-card-hover border border-custom-border text-slate-300 rounded-xl transition-all" title="Atualizar Base">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 text-ai-cyan"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="flex-1 bg-card rounded-2xl border border-custom-border overflow-auto shadow-2xl relative">
+            <!-- TABELA ESTILO OS WORKSPACE -->
+            <div class="flex-1 glass-panel rounded-2xl overflow-auto border border-custom-border shadow-2xl relative">
                 <table class="w-full text-left border-collapse text-xs">
-                    <thead class="bg-canvas/90 backdrop-blur border-b border-custom-border sticky top-0 z-10 text-slate-400 uppercase font-bold text-[10px] tracking-wider">
+                    <thead class="bg-canvas/90 backdrop-blur border-b border-custom-border sticky top-0 z-10 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
                         <tr id="table-header"></tr>
                     </thead>
-                    <tbody id="table-body" class="divide-y divide-custom-border text-slate-300"></tbody>
+                    <tbody id="table-body" class="divide-y divide-custom-border/60 text-slate-300"></tbody>
                 </table>
             </div>
         </main>
     </div>
 
-    <!-- MODAL IMPORTAÇÃO -->
-    <div id="import-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-card border border-custom-border rounded-2xl p-6 w-full max-w-lg space-y-5 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-custom-border pb-4">
+    <!-- MODAIS COM ESTILO CYBER GLASS -->
+    
+    <!-- MODAL EMPRESA WHITELABEL -->
+    <div id="company-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
+        <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-md space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i data-lucide="file-up" class="w-5 h-5 text-blue-400"></i>
-                    <span>Importar Planilha de Clientes (CSV / XLS)</span>
+                    <i data-lucide="building-2" class="w-4 h-4 text-ai-cyan"></i>
+                    <span>Personalização Whitelabel</span>
                 </h3>
-                <button onclick="closeModal('import-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-canvas transition-all">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                <button onclick="closeModal('company-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Selecione o Arquivo Excel ou CSV</label>
-                    <input type="file" id="file-input" accept=".csv, .xlsx, .xls" class="w-full bg-canvas border border-custom-border text-slate-300 text-xs rounded-xl p-2.5 file:mr-4 file:py-1.5 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold">Nome da Empresa Contratante</label>
+                    <input type="text" id="company-name-input" oninput="checkCompanyNameAvailability()" placeholder="Ex: CS DEV Solutions" class="w-full bg-canvas/90 border border-custom-border rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-ai-cyan font-mono">
+                </div>
+
+                <div id="company-status-badge" class="p-3 rounded-xl text-xs font-mono font-medium flex items-center gap-2 bg-canvas border border-custom-border text-slate-400">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                    <span>Insira o nome para verificar disponibilidade na rede.</span>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border/80">
+                <button onclick="closeModal('company-modal')" class="px-4 py-2.5 bg-canvas border border-custom-border text-slate-300 text-xs rounded-xl font-semibold">Cancelar</button>
+                <button id="save-company-btn" onclick="saveCompanyName()" disabled class="px-5 py-2.5 bg-gradient-to-r from-ai-cyan to-blue-600 hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed text-black font-extrabold text-xs rounded-xl shadow-neon-cyan">Salvar Nome</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL IMPORTAÇÃO DE DEMANDAS -->
+    <div id="import-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
+        <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-lg space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i data-lucide="file-up" class="w-4 h-4 text-ai-cyan"></i>
+                    <span>Carga de Carteira (CSV / XLS)</span>
+                </h3>
+                <button onclick="closeModal('import-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold">Arquivo Planilha Excel/CSV</label>
+                    <input type="file" id="file-input" accept=".csv, .xlsx, .xls" class="w-full bg-canvas/90 border border-custom-border text-slate-300 text-xs rounded-xl p-2.5 file:mr-4 file:py-1.5 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-ai-cyan file:text-black cursor-pointer">
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Data Padrão da Carga</label>
-                    <input type="date" id="import-date" class="w-full bg-canvas border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold">Data de Referência</label>
+                    <input type="date" id="import-date" class="w-full bg-canvas/90 border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-ai-cyan font-mono">
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Destinar Carteira Para:</label>
-                    <select id="import-target" onchange="toggleDivisionInfo()" class="w-full bg-canvas border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-medium">
-                        <option value="cobranca_ludmila">Somente Painel da Ludmila</option>
-                        <option value="cobranca_lucas">Somente Painel do Lucas</option>
-                        <option value="financeiro_lorena">Somente Painel da Lorena (Financeiro)</option>
-                        <option value="divide_equal">Dividir 50/50 Igualmente (Ludmila e Lucas)</option>
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold">Destinar Carteira Para:</label>
+                    <select id="import-target" onchange="toggleDivisionInfo()" class="w-full bg-canvas/90 border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-ai-cyan font-sans font-medium">
+                        <option value="cobranca_ludmila">Painel de Ludmila (Cobrança)</option>
+                        <option value="cobranca_lucas">Painel de Lucas (Cobrança)</option>
+                        <option value="cobranca_josue">Painel de Josué (Cobrança)</option>
+                        <option value="financeiro_lorena">Painel de Lorena (Financeiro)</option>
+                        <option value="financeiro_josue">Painel de Josué (Financeiro)</option>
+                        <option value="divide_equal">Distribuição Automática (50/50 Ludmila & Lucas)</option>
                     </select>
                 </div>
 
-                <div id="division-info-box" class="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs text-blue-300 hidden">
+                <div id="division-info-box" class="p-3.5 bg-ai-cyan/10 border border-ai-cyan/20 rounded-2xl text-xs text-ai-cyan hidden">
                     <div class="flex items-start gap-2">
-                        <i data-lucide="info" class="w-4 h-4 text-blue-400 shrink-0 mt-0.5"></i>
-                        <span>A planilha será distribuída alternadamente em partes iguais (1 para Ludmila, 1 para Lucas) de forma automática.</span>
+                        <i data-lucide="sparkles" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                        <span>O motor AI dividirá a carga alternadamente entre os colaboradores.</span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border">
-                <button onclick="closeModal('import-modal')" class="px-4 py-2.5 bg-canvas hover:bg-card border border-custom-border text-slate-300 text-xs rounded-xl font-semibold transition-all">Cancelar</button>
-                <button onclick="processImportFile()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
+            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border/80">
+                <button onclick="closeModal('import-modal')" class="px-4 py-2.5 bg-canvas border border-custom-border text-slate-300 text-xs rounded-xl font-semibold">Cancelar</button>
+                <button onclick="processImportFile()" class="px-5 py-2.5 bg-gradient-to-r from-ai-cyan to-blue-600 text-black font-extrabold text-xs rounded-xl flex items-center gap-2 shadow-neon-cyan">
                     <i data-lucide="check" class="w-4 h-4"></i>
-                    <span>Processar Importação</span>
+                    <span>Processar Carga</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL GERENCIAR COLUNAS -->
-    <div id="column-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-card border border-custom-border rounded-2xl p-6 w-full max-w-md space-y-5 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-custom-border pb-4">
+    <!-- MODAL GERENCIADOR DE COLUNAS -->
+    <div id="column-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
+        <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-md space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i data-lucide="columns-3" class="w-5 h-5 text-purple-400"></i>
-                    <span>Gerenciador de Colunas Master</span>
+                    <i data-lucide="sliders" class="w-4 h-4 text-ai-violet"></i>
+                    <span>Gerenciador de Campos</span>
                 </h3>
-                <button onclick="closeModal('column-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-canvas transition-all">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                <button onclick="closeModal('column-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Nome do Novo Campo</label>
-                    <input type="text" id="new-col-name" placeholder="Ex: Valor Cobrado, Retorno Agendado..." class="w-full bg-canvas border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold">Nome do Novo Campo</label>
+                    <input type="text" id="new-col-name" placeholder="Ex: Valor Negociado, Data Retorno" class="w-full bg-canvas/90 border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-ai-violet font-sans">
                 </div>
 
                 <div>
-                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Tipo do Campo</label>
-                    <select id="new-col-type" class="w-full bg-canvas border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500 font-medium">
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1.5 uppercase font-bold">Tipo de Dado</label>
+                    <select id="new-col-type" class="w-full bg-canvas/90 border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-ai-violet font-sans">
                         <option value="text">Texto Livre</option>
                         <option value="date">Data</option>
                         <option value="badge">Badge Destacada</option>
@@ -412,46 +493,56 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border">
-                <button onclick="closeModal('column-modal')" class="px-4 py-2.5 bg-canvas hover:bg-card border border-custom-border text-slate-300 text-xs rounded-xl font-semibold transition-all">Cancelar</button>
-                <button onclick="addNewColumn()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-purple-600/20 transition-all">
+            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border/80">
+                <button onclick="closeModal('column-modal')" class="px-4 py-2.5 bg-canvas border border-custom-border text-slate-300 text-xs rounded-xl font-semibold">Cancelar</button>
+                <button onclick="addNewColumn()" class="px-5 py-2.5 bg-ai-violet hover:bg-ai-violet/90 text-white font-extrabold text-xs rounded-xl flex items-center gap-2 shadow-neon-violet">
                     <i data-lucide="plus" class="w-4 h-4"></i>
-                    <span>Adicionar Coluna</span>
+                    <span>Criar Coluna</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL RELATÓRIO DIÁRIO -->
-    <div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-card border border-custom-border rounded-2xl p-6 w-full max-w-lg space-y-5 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-custom-border pb-4">
+    <!-- MODAL RELATÓRIO AUTOMÁTICO AI -->
+    <div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center hidden z-50 p-4">
+        <div class="glass-panel border border-custom-border rounded-3xl p-6 w-full max-w-lg space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-custom-border/80 pb-4">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i data-lucide="file-text" class="w-5 h-5 text-emerald-400"></i>
-                    <span>Relatório Diário Automatizado</span>
+                    <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i>
+                    <span>Relatório Inteligente Gerado</span>
                 </h3>
-                <button onclick="closeModal('report-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-canvas transition-all">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                <button onclick="closeModal('report-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
 
-            <textarea id="report-text" readonly class="w-full h-72 bg-canvas border border-custom-border rounded-xl p-4 text-xs font-mono text-emerald-300 focus:outline-none resize-none leading-relaxed shadow-inner"></textarea>
+            <textarea id="report-text" readonly class="w-full h-72 bg-canvas/90 border border-custom-border rounded-2xl p-4 text-xs font-mono text-emerald-400 focus:outline-none resize-none leading-relaxed"></textarea>
 
-            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border">
-                <button onclick="closeModal('report-modal')" class="px-4 py-2.5 bg-canvas hover:bg-card border border-custom-border text-slate-300 text-xs rounded-xl font-semibold transition-all">Fechar</button>
-                <button onclick="copyReportText()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all">
+            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border/80">
+                <button onclick="closeModal('report-modal')" class="px-4 py-2.5 bg-canvas border border-custom-border text-slate-300 text-xs rounded-xl font-semibold">Fechar</button>
+                <button onclick="copyReportText()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs rounded-xl flex items-center gap-2">
                     <i data-lucide="copy" class="w-4 h-4"></i>
-                    <span>Copiar Texto</span>
+                    <span>Copiar Relatório</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT MASTER COM AUTH & PERMISSÕES -->
+    <!-- MOTOR JAVASCRIPT RESTRUTURADO -->
     <script>
-        const SUPERVISOR_PIN = "2522";
+        const REGISTERED_IDS = {
+            '158': { name: 'Josué', role: 'dual', panels: ['cobranca_josue', 'financeiro_josue'] },
+            '122': { name: 'Ludmila', role: 'cobranca', panels: ['cobranca_ludmila'] },
+            '164': { name: 'Lucas', role: 'cobranca', panels: ['cobranca_lucas'] },
+            '125': { name: 'Lorena', role: 'financeiro', panels: ['financeiro_lorena'] },
+            '2522': { name: 'Supervisor', role: 'master', panels: ['cobranca_ludmila', 'cobranca_lucas', 'cobranca_josue', 'financeiro_lorena', 'financeiro_josue'] }
+        };
+
+        const TAKEN_COMPANY_NAMES = ['csdevsolutions', 'csdev', 'csdev painel', 'mi prime cell'];
+
         let isSupervisor = false;
-        let currentOperator = 'cobranca_ludmila';
+        let currentOperator = 'cobranca_josue';
+        let currentCompanyName = 'CS DEV Solutions';
         let currentModalidade = 'todos';
 
         const SLA_OPTIONS = [
@@ -460,14 +551,14 @@
         ];
 
         const SLA_BADGE_STYLES = {
-            'NO PRAZO': 'bg-emerald-900/80 text-emerald-100 border border-emerald-500/30',
-            'ATENÇÃO': 'bg-amber-200 text-amber-950 font-bold',
-            'CUIDADO PRAZO ESTOURANDO': 'bg-orange-300 text-orange-950 font-bold',
-            'QUASE ESGOTADO': 'bg-red-900 text-red-100 border border-red-500/30',
-            'PRAZO ESGOTADO': 'bg-purple-900 text-purple-100 border border-purple-500/30',
-            'ABERTURA': 'bg-blue-800 text-blue-100 border border-blue-400/30',
-            'ERRO NA SLA AVANÇAR': 'bg-zinc-800 text-zinc-300 border border-zinc-600',
-            'SLA': 'bg-purple-300 text-purple-950 font-bold'
+            'NO PRAZO': 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+            'ATENÇÃO': 'bg-amber-500/20 text-amber-300 border border-amber-500/40',
+            'CUIDADO PRAZO ESTOURANDO': 'bg-orange-500/20 text-orange-400 border border-orange-500/40',
+            'QUASE ESGOTADO': 'bg-rose-500/20 text-rose-400 border border-rose-500/40',
+            'PRAZO ESGOTADO': 'bg-purple-500/20 text-purple-300 border border-purple-500/40',
+            'ABERTURA': 'bg-ai-cyan/10 text-ai-cyan border border-ai-cyan/30',
+            'ERRO NA SLA AVANÇAR': 'bg-zinc-800 text-zinc-400 border border-zinc-700',
+            'SLA': 'bg-ai-violet/20 text-ai-violet border border-ai-violet/30'
         };
 
         const ETAPAS_COBRANCA = [
@@ -476,29 +567,29 @@
 
         let columnsConfig = {
             cobranca: [
-                { id: 'prioridade', name: 'Prioridade de Atendimento' },
-                { id: 'dataAbertura', name: 'Data Abertura / Vencimento' },
+                { id: 'prioridade', name: 'Prioridade' },
+                { id: 'dataAbertura', name: 'Data Abertura' },
                 { id: 'cliente', name: 'Nome do Cliente' },
-                { id: 'etapa', name: 'Etapa de Cobrança' },
-                { id: 'statusSLA', name: 'SLA / Prazo' },
-                { id: 'modalidade', name: 'Modalidade' },
+                { id: 'etapa', name: 'Etapa Cobrança' },
+                { id: 'statusSLA', name: 'SLA / Status' },
+                { id: 'modalidade', name: 'Segmento' },
                 { id: 'acoes', name: 'Ações' }
             ],
             financeiro: [
-                { id: 'etapa', name: 'Etapa / Assunto' },
+                { id: 'etapa', name: 'Assunto / Etapa' },
                 { id: 'cliente', name: 'Nome do Cliente' },
                 { id: 'contato', name: 'Telefone Celular' },
                 { id: 'revertido', name: 'Revertido' },
-                { id: 'dataAbertura', name: 'Data de Contato' },
+                { id: 'dataAbertura', name: 'Data Contato' },
                 { id: 'acoes', name: 'Ações' }
             ]
         };
 
         let dataset = [
-            { id: 101, operator: 'cobranca_ludmila', prioridade: 'ATENDIMENTO NORMAL', dataAbertura: '14/09/2026', cliente: 'VITORIA LAIS FERREIRA SILVA', modalidade: 'caixa', etapa: 'Etapa 2', statusSLA: 'NO PRAZO', finalizado: false },
-            { id: 102, operator: 'cobranca_ludmila', prioridade: 'URGENTE', dataAbertura: '14/09/2026', cliente: 'ANA CLARA SILVA COSTA', modalidade: 'caixa', etapa: 'Etapa 2', statusSLA: 'ATENÇÃO', finalizado: false },
-            { id: 103, operator: 'cobranca_lucas', prioridade: 'URGENTE', dataAbertura: '14/09/2026', cliente: 'JONAS DA SILVA LIMA', modalidade: 'agendamento', etapa: 'Etapa 3', statusSLA: 'QUASE ESGOTADO', finalizado: false },
-            { id: 104, operator: 'financeiro_lorena', prioridade: 'NORMAL', dataAbertura: '14/09/2026', cliente: 'VALDEMAR RODRIGUES DA SILVA', contato: '(61) 99999-8888', revertido: 'SIM', etapa: 'Em dias', statusSLA: 'NO PRAZO', finalizado: false }
+            { id: 101, operator: 'cobranca_josue', prioridade: 'ATENDIMENTO NORMAL', dataAbertura: '15/09/2026', cliente: 'CARLOS EDURADO FERREIRA', modalidade: 'caixa', etapa: 'Etapa 1', statusSLA: 'NO PRAZO', finalizado: false },
+            { id: 102, operator: 'financeiro_josue', prioridade: 'NORMAL', dataAbertura: '15/09/2026', cliente: 'MARIA ALICE PEREIRA', contato: '(61) 98888-7777', revertido: 'SIM', etapa: 'Em dias', statusSLA: 'NO PRAZO', finalizado: false },
+            { id: 103, operator: 'cobranca_ludmila', prioridade: 'URGENTE', dataAbertura: '15/09/2026', cliente: 'VALDEMAR RODRIGUES DA SILVA', modalidade: 'caixa', etapa: 'Etapa 2', statusSLA: 'ATENÇÃO', finalizado: false },
+            { id: 104, operator: 'financeiro_lorena', prioridade: 'NORMAL', dataAbertura: '15/09/2026', cliente: 'ANA CLARA SILVA COSTA', contato: '(61) 99999-8888', revertido: 'NÃO', etapa: 'Em dias', statusSLA: 'NO PRAZO', finalizado: false }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -507,34 +598,28 @@
             lucide.createIcons();
         });
 
-        function togglePinInput() {
-            const user = document.getElementById('login-user').value;
-            const pinContainer = document.getElementById('pin-container');
-            if(user === 'supervisor') {
-                pinContainer.classList.remove('hidden');
-            } else {
-                pinContainer.classList.add('hidden');
-            }
-        }
-
         function handleLogin() {
-            const user = document.getElementById('login-user').value;
-            const pin = document.getElementById('login-pin').value;
+            const inputVal = document.getElementById('login-input').value.trim();
 
-            if(user === 'supervisor') {
-                if(pin !== SUPERVISOR_PIN) {
-                    alert('PIN de Supervisor incorreto!');
-                    return;
-                }
+            if (!REGISTERED_IDS[inputVal]) {
+                alert('ID de Agente ou Chave Master inválida!');
+                return;
+            }
+
+            const user = REGISTERED_IDS[inputVal];
+
+            if (inputVal === '2522') {
                 isSupervisor = true;
                 document.getElementById('supervisor-actions').classList.remove('hidden');
                 document.getElementById('nav-operators-container').classList.remove('hidden');
-                switchOperator('cobranca_ludmila');
+                document.getElementById('role-badge').textContent = 'Supervisor Master';
+                switchOperator('cobranca_josue');
             } else {
                 isSupervisor = false;
                 document.getElementById('supervisor-actions').classList.add('hidden');
                 document.getElementById('nav-operators-container').classList.add('hidden');
-                switchOperator(user);
+                document.getElementById('role-badge').textContent = `Agente ${user.name}`;
+                switchOperator(user.panels[0]);
             }
 
             document.getElementById('login-screen').classList.add('hidden');
@@ -542,20 +627,20 @@
 
         function logout() {
             document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('login-pin').value = '';
+            document.getElementById('login-input').value = '';
         }
 
         function switchOperator(operatorKey) {
             currentOperator = operatorKey;
 
             document.querySelectorAll('.nav-tab').forEach(btn => {
-                btn.classList.remove('bg-blue-600/20', 'text-blue-400', 'border', 'border-blue-500/30', 'font-bold');
+                btn.classList.remove('bg-ai-cyan/10', 'text-ai-cyan', 'border', 'border-ai-cyan/30', 'font-bold');
                 btn.classList.add('text-slate-400');
             });
 
             const activeBtn = document.getElementById(`nav-${operatorKey}`);
             if(activeBtn) {
-                activeBtn.classList.add('bg-blue-600/20', 'text-blue-400', 'border', 'border-blue-500/30', 'font-bold');
+                activeBtn.classList.add('bg-ai-cyan/10', 'text-ai-cyan', 'border', 'border-ai-cyan/30', 'font-bold');
                 activeBtn.classList.remove('text-slate-400');
             }
 
@@ -564,21 +649,26 @@
             const cobrancaFilters = document.getElementById('panel-cobranca-filters');
             const lorenaRules = document.getElementById('panel-lorena-rules');
 
-            if(operatorKey === 'cobranca_ludmila') {
+            if (operatorKey.includes('josue')) {
+                nameEl.textContent = 'Josué';
+                roleEl.textContent = operatorKey.startsWith('financeiro') ? 'Painel de Financeiro' : 'Painel de Cobrança';
+            } else if (operatorKey.includes('ludmila')) {
                 nameEl.textContent = 'Ludmila';
                 roleEl.textContent = 'Painel Exclusivo de Cobrança';
-                cobrancaFilters.classList.remove('hidden');
-                lorenaRules.classList.add('hidden');
-            } else if(operatorKey === 'cobranca_lucas') {
+            } else if (operatorKey.includes('lucas')) {
                 nameEl.textContent = 'Lucas';
                 roleEl.textContent = 'Painel Exclusivo de Cobrança';
-                cobrancaFilters.classList.remove('hidden');
-                lorenaRules.classList.add('hidden');
-            } else if(operatorKey === 'financeiro_lorena') {
+            } else if (operatorKey.includes('lorena')) {
                 nameEl.textContent = 'Lorena';
                 roleEl.textContent = 'Painel Exclusivo de Financeiro';
+            }
+
+            if (operatorKey.startsWith('financeiro')) {
                 cobrancaFilters.classList.add('hidden');
                 lorenaRules.classList.remove('hidden');
+            } else {
+                cobrancaFilters.classList.remove('hidden');
+                lorenaRules.classList.add('hidden');
             }
 
             renderTable();
@@ -638,16 +728,16 @@
 
             if(operatorData.length === 0) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td colspan="${activeCols.length}" class="py-8 text-center text-slate-500 font-medium">Nenhum registro encontrado para este painel.</td>`;
+                tr.innerHTML = `<td colspan="${activeCols.length}" class="py-10 text-center text-slate-500 font-mono text-xs">Nenhum registro encontrado no cockpit deste operador.</td>`;
                 tableBody.appendChild(tr);
             } else {
                 operatorData.forEach(row => {
                     const tr = document.createElement('tr');
-                    tr.className = `bg-card-hover transition-colors ${row.finalizado ? 'opacity-40 bg-emerald-950/10' : ''}`;
+                    tr.className = `hover:bg-card-hover/80 transition-colors ${row.finalizado ? 'opacity-40 bg-emerald-950/10' : ''}`;
 
                     activeCols.forEach(col => {
                         const td = document.createElement('td');
-                        td.className = 'py-3.5 px-4 align-middle';
+                        td.className = 'py-3 px-4 align-middle';
 
                         if(col.id === 'statusSLA') {
                             const badgeStyle = SLA_BADGE_STYLES[row.statusSLA] || 'bg-zinc-800 text-slate-200';
@@ -656,7 +746,7 @@
                             ).join('');
 
                             td.innerHTML = `
-                                <select onchange="updateRowField(${row.id}, 'statusSLA', this.value)" class="badge-status ${badgeStyle} cursor-pointer border-0 outline-none focus:ring-2 focus:ring-blue-500">
+                                <select onchange="updateRowField(${row.id}, 'statusSLA', this.value)" class="badge-status ${badgeStyle} cursor-pointer outline-none focus:ring-1 focus:ring-ai-cyan bg-canvas">
                                     ${optionsHtml}
                                 </select>
                             `;
@@ -666,35 +756,35 @@
                             ).join('');
 
                             td.innerHTML = `
-                                <select onchange="updateRowField(${row.id}, 'etapa', this.value)" class="bg-canvas border border-custom-border text-slate-300 text-xs rounded-lg px-2 py-1 font-semibold focus:outline-none focus:border-blue-500">
+                                <select onchange="updateRowField(${row.id}, 'etapa', this.value)" class="bg-canvas border border-custom-border text-slate-300 text-xs rounded-lg px-2 py-1 font-semibold focus:outline-none focus:border-ai-cyan">
                                     ${optionsHtml}
                                 </select>
                             `;
                         } else if(col.id === 'prioridade') {
                             const isUrgente = row.prioridade === 'URGENTE';
                             td.innerHTML = `
-                                <span class="px-2.5 py-1 rounded-md text-[10px] font-bold ${isUrgente ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
-                                    ${row.prioridade || 'ATENDIMENTO NORMAL'}
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold ${isUrgente ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' : 'bg-canvas text-slate-400 border border-custom-border'}">
+                                    ${row.prioridade || 'NORMAL'}
                                 </span>
                             `;
                         } else if(col.id === 'modalidade') {
                             const modUpper = (row.modalidade || 'caixa').toUpperCase();
-                            td.innerHTML = `<span class="text-[11px] font-mono font-semibold text-slate-400 bg-canvas px-2.5 py-1 rounded-lg border border-custom-border">${modUpper}</span>`;
+                            td.innerHTML = `<span class="text-[10px] font-mono font-bold text-ai-cyan bg-ai-cyan/5 px-2 py-0.5 rounded border border-ai-cyan/20">${modUpper}</span>`;
                         } else if(col.id === 'acoes') {
                             td.innerHTML = `
                                 <div class="flex items-center gap-2">
-                                    <button onclick="toggleFinalize(${row.id})" class="p-1.5 ${row.finalizado ? 'bg-emerald-600 text-white' : 'bg-canvas hover:bg-emerald-600/20 text-slate-400 hover:text-emerald-400'} border border-custom-border rounded-lg transition-all" title="Concluir Demanda">
+                                    <button onclick="toggleFinalize(${row.id})" class="p-1.5 ${row.finalizado ? 'bg-emerald-500 text-black' : 'bg-canvas hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-400'} border border-custom-border rounded-lg transition-all" title="Concluir Demanda">
                                         <i data-lucide="check" class="w-3.5 h-3.5"></i>
                                     </button>
                                     ${isSupervisor ? `
-                                    <button onclick="deleteRow(${row.id})" class="p-1.5 bg-canvas hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 border border-custom-border rounded-lg transition-all" title="Excluir Registro">
+                                    <button onclick="deleteRow(${row.id})" class="p-1.5 bg-canvas hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-custom-border rounded-lg transition-all" title="Excluir Registro">
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                     </button>` : ''}
                                 </div>
                             `;
                         } else {
                             td.contentEditable = "true";
-                            td.className += " editable-cell rounded px-2 py-1 focus:bg-canvas";
+                            td.className += " editable-cell rounded px-2 py-1";
                             td.textContent = row[col.id] || '-';
                             td.onblur = (e) => {
                                 row[col.id] = e.target.textContent;
@@ -709,6 +799,42 @@
             }
 
             lucide.createIcons();
+        }
+
+        function checkCompanyNameAvailability() {
+            const rawVal = document.getElementById('company-name-input').value.trim();
+            const normalized = rawVal.toLowerCase();
+            const badge = document.getElementById('company-status-badge');
+            const saveBtn = document.getElementById('save-company-btn');
+
+            if (!rawVal) {
+                badge.className = "p-3 rounded-xl text-xs font-mono font-medium flex items-center gap-2 bg-canvas border border-custom-border text-slate-400";
+                badge.innerHTML = `<i data-lucide="info" class="w-4 h-4"></i><span>Insira o nome para verificar disponibilidade na rede.</span>`;
+                saveBtn.disabled = true;
+                lucide.createIcons();
+                return;
+            }
+
+            if (TAKEN_COMPANY_NAMES.includes(normalized)) {
+                badge.className = "p-3 rounded-xl text-xs font-mono font-bold flex items-center gap-2 bg-rose-500/10 border border-rose-500/30 text-rose-400";
+                badge.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4"></i><span>${rawVal} — NOME INDISPONÍVEL</span>`;
+                saveBtn.disabled = true;
+            } else {
+                badge.className = "p-3 rounded-xl text-xs font-mono font-bold flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
+                badge.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>${rawVal} — DISPONÍVEL</span>`;
+                saveBtn.disabled = false;
+            }
+            lucide.createIcons();
+        }
+
+        function saveCompanyName() {
+            const newName = document.getElementById('company-name-input').value.trim();
+            if (newName) {
+                currentCompanyName = newName;
+                document.getElementById('display-company-title').textContent = newName;
+                document.getElementById('header-company-name').childNodes[0].nodeValue = newName + " ";
+                closeModal('company-modal');
+            }
         }
 
         function updateRowField(id, field, value) {
@@ -728,7 +854,7 @@
         }
 
         function deleteRow(id) {
-            if(confirm('Tem certeza que deseja excluir este registro?')) {
+            if(confirm('Confirmar exclusão deste registro?')) {
                 dataset = dataset.filter(i => i.id !== id);
                 renderTable();
             }
@@ -758,7 +884,7 @@
             const dateVal = document.getElementById('import-date').value;
 
             if(!fileInput.files.length) {
-                alert('Por favor, selecione um arquivo de planilha CSV ou Excel.');
+                alert('Selecione um arquivo de planilha CSV/XLS.');
                 return;
             }
 
@@ -773,7 +899,7 @@
                 const json = XLSX.utils.sheet_to_json(worksheet);
 
                 if(!json.length) {
-                    alert('Nenhum dado encontrado na planilha importada.');
+                    alert('Nenhum dado encontrado no arquivo.');
                     return;
                 }
 
@@ -787,29 +913,22 @@
                     }
 
                     let defaultDate = dateVal ? dateVal.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
-                    let sheetDate = item['Data de Abertura'] || item['DATA DE ABERTURA'] || item['DATA'] || item['Data'] || defaultDate;
-
-                    let prioridadeVal = item['Prioridade de Atendimento'] || item['PRIORIDADE DE ATENDIMENTO'] || item['Prioridade'] || 'ATENDIMENTO NORMAL';
-                    let clienteVal = item['Nome do Cliente'] || item['NOME DO CLIENTE'] || item['NOME'] || item['Cliente'] || 'CLIENTE SEM NOME';
-                    let etapaVal = item['Etapa de Cobrança'] || item['ETAPA DE COBRANÇA'] || item['Etapa'] || item['ETAPA'] || 'Etapa 1';
-                    let slaVal = item['SLA / Prazo'] || item['SLA'] || item['PRAZO'] || item['Status SLA'] || 'NO PRAZO';
 
                     dataset.push({
                         id: Date.now() + idx,
                         operator: assignedOperator,
-                        prioridade: prioridadeVal,
-                        dataAbertura: sheetDate,
-                        cliente: clienteVal,
-                        etapa: etapaVal,
-                        statusSLA: slaVal,
-                        modalidade: (item['MODALIDADE'] || item['Modalidade'] || 'caixa').toLowerCase(),
-                        contato: item['TELEFONE'] || item['CONTATO'] || item['Celular'] || '-',
-                        revertido: item['REVERTIDO'] || 'NÃO',
+                        prioridade: item['Prioridade'] || 'NORMAL',
+                        dataAbertura: item['Data'] || defaultDate,
+                        cliente: item['Cliente'] || item['Nome'] || 'CLIENTE NÃO IDENTIFICADO',
+                        etapa: item['Etapa'] || 'Etapa 1',
+                        statusSLA: item['SLA'] || 'NO PRAZO',
+                        modalidade: (item['Modalidade'] || 'caixa').toLowerCase(),
+                        contato: item['Telefone'] || item['Contato'] || '-',
+                        revertido: item['Revertido'] || 'NÃO',
                         finalizado: false
                     });
                 });
 
-                alert(`Importação concluída com sucesso! ${json.length} registros inseridos.`);
                 closeModal('import-modal');
                 renderTable();
             };
@@ -821,10 +940,7 @@
             const name = document.getElementById('new-col-name').value.trim();
             const type = document.getElementById('new-col-type').value;
 
-            if(!name) {
-                alert('Por favor, digite o nome da coluna.');
-                return;
-            }
+            if(!name) return;
 
             const colId = 'custom_' + Date.now();
             const isFinance = currentOperator.startsWith('financeiro');
@@ -843,32 +959,25 @@
             const finalizados = operatorData.filter(i => i.finalizado).length;
             const pendentes = total - finalizados;
 
-            let operatorName = 'Ludmila';
-            if(currentOperator === 'cobranca_lucas') operatorName = 'Lucas';
-            if(currentOperator === 'financeiro_lorena') operatorName = 'Lorena';
-
-            const dateToday = new Date().toLocaleDateString('pt-BR');
-
             let report = `=========================================\n`;
-            report += `📊 RELATÓRIO DIÁRIO DE PERFORMANCE OPERACIONAL BI\n`;
+            report += `🤖 REPORT AI CORE — ${currentCompanyName.toUpperCase()}\n`;
             report += `=========================================\n`;
-            report += `👤 OPERADOR(A): ${operatorName.toUpperCase()}\n`;
-            report += `📅 DATA DE EMISSÃO: ${dateToday}\n`;
+            report += `📅 DATA: ${new Date().toLocaleDateString('pt-BR')}\n`;
+            report += `👤 AGENTE: ${currentOperator.toUpperCase()}\n`;
             report += `-----------------------------------------\n`;
-            report += `📈 RESUMO GERAL DE CARTEIRA:\n`;
-            report += `   • Total de Demandas: ${total}\n`;
-            report += `   • Concluídos / Revertidos: ${finalizados}\n`;
-            report += `   • Em Andamento / Pendentes: ${pendentes}\n`;
-            report += `   • Taxa de Conclusão: ${total > 0 ? Math.round((finalizados/total)*100) : 0}%\n`;
+            report += `📊 PERFORMANCE DA CARTEIRA:\n`;
+            report += `   • Total Allocations: ${total}\n`;
+            report += `   • Concluídos: ${finalizados}\n`;
+            report += `   • Pendentes: ${pendentes}\n`;
+            report += `   • Taxa Conclusão: ${total > 0 ? Math.round((finalizados/total)*100) : 0}%\n`;
             report += `-----------------------------------------\n`;
-            report += `📋 DETALHAMENTO DAS DEMANDAS:\n`;
+            report += `📋 REGISTROS:\n`;
 
             operatorData.forEach((item, idx) => {
-                report += `${idx + 1}. ${item.cliente} | Etapa: ${item.etapa} | SLA: ${item.statusSLA} | [${item.finalizado ? 'CONCLUÍDO' : 'PENDENTE'}]\n`;
+                report += `${idx + 1}. ${item.cliente} | SLA: ${item.statusSLA} | [${item.finalizado ? 'OK' : 'PENDENTE'}]\n`;
             });
 
             report += `=========================================\n`;
-            report += `CS DEV Enterprise System v3.6\n`;
 
             document.getElementById('report-text').value = report;
             openModal('report-modal');
@@ -877,7 +986,6 @@
         function copyReportText() {
             const copyText = document.getElementById('report-text');
             copyText.select();
-            copyText.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(copyText.value);
             alert('Relatório copiado para a área de transferência!');
         }
