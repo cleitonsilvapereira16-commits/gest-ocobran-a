@@ -107,7 +107,6 @@
 
     <!-- TELA DE LOGIN / WORKSPACE INITIALIZER -->
     <div id="login-screen" class="fixed inset-0 bg-canvas/95 backdrop-blur-2xl z-50 flex items-center justify-center p-4">
-        <!-- Ambient Glow -->
         <div class="absolute w-[500px] h-[500px] bg-[var(--color-primary)]/15 rounded-full blur-[140px] pointer-events-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
 
         <div class="glass-panel p-8 rounded-3xl w-full max-w-md space-y-6 shadow-2xl relative z-10 border border-custom-border/80">
@@ -944,13 +943,14 @@
 
                 function findValue(row, keywords) {
                     const keys = Object.keys(row);
-                    for (let key of keys) {
-                        const cleanKey = key.toLowerCase()
-                            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                            .trim();
-                        for (let kw of keywords) {
-                            if (cleanKey.includes(kw)) {
-                                return row[key];
+                    for (let kw of keywords) {
+                        for (let key of keys) {
+                            const cleanKey = key.toLowerCase()
+                                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                                .trim();
+                            const val = row[key];
+                            if (cleanKey.includes(kw) && val !== undefined && val !== null && String(val).trim() !== '') {
+                                return String(val).trim();
                             }
                         }
                     }
@@ -968,7 +968,7 @@
 
                     let defaultDate = dateVal ? dateVal.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
 
-                    const clienteNome = findValue(item, ['cliente', 'nome', 'razao', 'devedor', 'sacado', 'empresa']) || 'CLIENTE NÃO IDENTIFICADO';
+                    const clienteNome = findValue(item, ['nome do cliente', 'nome cliente', 'cliente', 'razao', 'devedor', 'sacado', 'empresa', 'nome']) || 'CLIENTE NÃO IDENTIFICADO';
                     const dataAbertura = findValue(item, ['data', 'dt', 'abertura', 'vencimento']) || defaultDate;
                     const prioridade = findValue(item, ['prioridade', 'prio', 'urgencia']) || 'NORMAL';
                     const etapa = findValue(item, ['etapa', 'fase', 'status']) || 'Etapa 1';
