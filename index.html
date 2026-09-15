@@ -1,838 +1,886 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="scroll-smooth">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">Painel de Cobrança Enterprise</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Sistema de Gestão Operacional & Cobrança — CS DEV</title>
+    
+    <!-- TAILWIND CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- PapaParse para CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        dark: { 900: '#0a0a0a', 800: '#141414', 700: '#1f1f1f', 600: '#2d2d2d' },
-                        brand: { 500: 'var(--brand-color, #f97316)', 600: 'var(--brand-color-dark, #ea580c)' }
+                        canvas: '#0D0E12',
+                        card: '#16181E',
+                        'card-hover': '#1F222A',
+                        'custom-border': '#2A2D3A',
+                        brand: {
+                            blue: '#3B82F6',
+                            green: '#10B981',
+                            purple: '#8B5CF6',
+                            amber: '#F59E0B',
+                            rose: '#F43F5E'
+                        }
                     }
                 }
             }
         }
     </script>
+    
+    <!-- BIBLIOTECA SHEETJS (XLSX/CSV) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- LUCIDE ICONS -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        :root { --brand-color: #f97316; --brand-color-dark: #ea580c; }
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; }
-        .glow-brand { box-shadow: 0 0 15px rgba(249, 115, 22, 0.15); }
-        .bg-brand { background-color: var(--brand-color); }
-        .text-brand { color: var(--brand-color); }
-        .border-brand { border-color: var(--brand-color); }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #2d2d2d; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--brand-color); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            background-color: #0D0E12;
+            color: #E2E8F0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D0E12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A2D3A;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3B82F6;
+        }
+
+        .editable-cell {
+            transition: all 0.2s ease;
+        }
+        .editable-cell:focus {
+            outline: none;
+            background-color: #1F222A;
+            box-shadow: inset 0 0 0 2px #3B82F6;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 0.375rem;
+            font-size: 0.6875rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
     </style>
 </head>
-<body class="text-slate-100 antialiased min-h-screen flex flex-col justify-between">
+<body class="h-screen flex flex-col overflow-hidden bg-canvas text-slate-200">
 
-    <!-- TELA DE LOGIN -->
-    <div id="login-screen" class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-dark-800 border border-dark-700 p-8 rounded-2xl w-full max-w-md glow-brand relative overflow-hidden">
-            <div id="login-top-bar" class="absolute top-0 left-0 w-full h-1.5 bg-brand"></div>
-
-            <div class="text-center mb-8">
-                <div id="company-logo-container" class="mb-3 flex justify-center">
-                    <span class="text-3xl text-brand"><i class="fa-solid fa-wallet"></i></span>
+    <!-- TELA DE LOGIN / PIN -->
+    <div id="login-screen" class="fixed inset-0 bg-canvas z-50 flex items-center justify-center p-4">
+        <div class="bg-card border border-custom-border p-8 rounded-2xl w-full max-w-md space-y-6 shadow-2xl">
+            <div class="text-center space-y-2">
+                <div class="inline-flex p-3 bg-blue-600/20 text-blue-400 rounded-2xl border border-blue-500/30 mb-2">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
                 </div>
-                <h1 id="company-name-display" class="text-2xl font-black tracking-wider text-white">CS<span class="text-brand">DEV</span></h1>
-                <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest">Painel de Cobrança Inteligente</p>
+                <h2 class="text-xl font-bold text-white tracking-wide">Acesso ao Sistema CS DEV</h2>
+                <p class="text-xs text-slate-400">Selecione seu usuário para acessar o painel</p>
             </div>
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Acesso por ID ou Supervisor</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500"><i class="fa-solid fa-id-card"></i></span>
-                        <input type="password" id="access-input" placeholder="Insira o seu ID ou Código"
-                               class="w-full bg-dark-900 border border-dark-600 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-brand transition text-center font-semibold tracking-wider">
-                    </div>
+                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Usuário / Perfil</label>
+                    <select id="login-user" onchange="togglePinInput()" class="w-full bg-canvas border border-custom-border rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                        <option value="cobranca_ludmila">Ludmila (Cobrança)</option>
+                        <option value="cobranca_lucas">Lucas (Cobrança)</option>
+                        <option value="financeiro_lorena">Lorena (Financeiro)</option>
+                        <option value="supervisor">Supervisor / Master (Acesso Restrito)</option>
+                    </select>
                 </div>
 
-                <button onclick="realizarLogin()" class="w-full bg-brand hover:opacity-90 text-dark-900 font-bold py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-sign-in-alt"></i> Entrar no Sistema
+                <div id="pin-container" class="hidden">
+                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">PIN de Segurança (Supervisor)</label>
+                    <input type="password" id="login-pin" maxlength="4" placeholder="Digite o PIN de 4 dígitos" class="w-full bg-canvas border border-custom-border rounded-xl p-3 text-xs text-center tracking-widest text-white text-lg focus:outline-none focus:border-blue-500">
+                </div>
+
+                <button onclick="handleLogin()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    <span>Entrar no Painel</span>
                 </button>
-            </div>
-
-            <div class="mt-8 pt-6 border-t border-dark-700 text-center">
-                <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-3">IDs de Equipe & Supervisor</p>
-                <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-400">
-                    <div class="bg-dark-900/50 p-1.5 rounded border border-dark-700">Josué: <span class="text-brand font-bold">158</span></div>
-                    <div class="bg-dark-900/50 p-1.5 rounded border border-dark-700">Lorena: <span class="text-brand font-bold">125</span></div>
-                    <div class="bg-dark-900/50 p-1.5 rounded border border-dark-700">Ludmila: <span class="text-brand font-bold">122</span></div>
-                    <div class="bg-dark-900/50 p-1.5 rounded border border-dark-700">Lucas: <span class="text-brand font-bold">164</span></div>
-                </div>
-                <p class="text-[9px] text-slate-500 mt-3">Supervisor: código `2522`</p>
             </div>
         </div>
     </div>
 
-    <!-- PAINEL DO COLABORADOR -->
-    <div id="colaborador-panel" class="hidden flex-grow flex flex-col md:flex-row h-screen overflow-hidden">
-        <aside class="w-full md:w-80 bg-dark-800 border-r border-dark-700 flex flex-col justify-between">
-            <div class="p-6">
-                <div class="flex items-center gap-3.5 pb-6 border-b border-dark-700">
-                    <div class="w-12 h-12 bg-dark-900 border border-dark-600 rounded-xl flex items-center justify-center text-brand text-xl font-black">
-                        <i class="fa-solid fa-user-tie"></i>
-                    </div>
-                    <div>
-                        <h2 id="colab-name" class="font-extrabold text-white text-base">Nome do Colaborador</h2>
-                        <span id="colab-id" class="text-[10px] uppercase font-bold tracking-widest text-brand">ID: ---</span>
-                    </div>
+    <!-- HEADER / TOPBAR NAVIGATION MASTER -->
+    <header class="h-16 bg-card border-b border-custom-border px-6 flex items-center justify-between shrink-0 z-20 shadow-xl">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30 shadow-inner">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
                 </div>
-
-                <div class="mt-8 space-y-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Desempenho da Carteira</h3>
-                    <div class="bg-dark-900 p-4 rounded-xl border border-dark-700">
-                        <span class="text-[10px] text-slate-400 uppercase font-medium">Progresso de Execução</span>
-                        <div class="flex items-center justify-between mt-1 mb-1.5">
-                            <span id="colab-progress-text" class="text-sm font-bold text-brand">0 / 0</span>
-                            <span id="colab-progress-percent" class="text-xs text-slate-400">0%</span>
-                        </div>
-                        <div class="w-full bg-dark-700 h-1.5 rounded-full overflow-hidden">
-                            <div id="colab-progress-bar" class="bg-brand h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-6 border-t border-dark-700">
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                    <span><i class="fa-regular fa-clipboard mr-1.5 text-brand"></i> Bloco de Notas</span>
-                    <span class="text-[10px] text-slate-500 font-normal">Autosalvamento</span>
-                </label>
-                <textarea id="colab-notes" oninput="salvarBlocoNotas()" placeholder="Rascunhe observações rápidas..."
-                          class="w-full bg-dark-900 border border-dark-600 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand h-32 resize-none"></textarea>
-
-                <button onclick="logout()" class="mt-6 flex items-center justify-center gap-2 text-slate-400 hover:text-red-400 transition text-xs font-bold w-full py-2.5 rounded-lg border border-dark-700 hover:border-red-500/20 bg-dark-900/50">
-                    <i class="fa-solid fa-sign-out-alt"></i> Sair da Conta
-                </button>
-            </div>
-        </aside>
-
-        <main class="flex-1 flex flex-col overflow-hidden bg-dark-900">
-            <header class="bg-dark-800 border-b border-dark-700 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-xl font-extrabold text-white">Minha Carteira de Clientes</h1>
-                    <p class="text-xs text-slate-400 mt-1">Gerencie a régua de cobrança, PIX e acione via WhatsApp.</p>
+                    <h1 class="font-bold text-base text-white tracking-wide leading-none flex items-center gap-2">
+                        CS DEV <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-mono font-semibold">ENTERPRISE v3.6</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Painel Operacional de Recuperação & Gestão BI</p>
                 </div>
-                <button onclick="abrirModalRelatorioGeral()" class="w-full sm:w-auto px-4 py-2.5 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-xs font-bold text-white transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-copy"></i> Copiar Relatório Geral
-                </button>
-            </header>
-
-            <div class="p-6 pb-0 flex flex-col sm:flex-row gap-4">
-                <div class="relative flex-1">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500"><i class="fa-solid fa-search"></i></span>
-                    <input type="text" id="search-client" oninput="renderizarColabTable()" placeholder="Buscar por nome do cliente..." 
-                           class="w-full bg-dark-800 border border-dark-700 rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand">
-                </div>
-                <select id="filter-status" onchange="renderizarColabTable()" class="bg-dark-800 border border-dark-700 rounded-xl py-2 px-3 text-xs text-slate-300 focus:outline-none focus:border-brand">
-                    <option value="ALL">Todos os Status</option>
-                    <option value="Sem retorno">🚫 Sem retorno</option>
-                    <option value="Encaminhada mensagem no OPA">💬 Mensagem OPA</option>
-                    <option value="Ligação">📞 Ligação Realizada</option>
-                    <option value="Está em caixa">💰 Está em Caixa</option>
-                </select>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-6">
-                <div class="bg-dark-800 rounded-2xl border border-dark-700 overflow-hidden shadow-xl">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-dark-700/50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-dark-700">
-                                    <th class="p-4">Cliente</th>
-                                    <th class="p-4">Telefone</th>
-                                    <th class="p-4">Valor (R$)</th>
-                                    <th class="p-4">Etapa Cobrança</th>
-                                    <th class="p-4">Status Canal</th>
-                                    <th class="p-4">Progresso</th>
-                                    <th class="p-4 text-center">Ações Rápidas</th>
-                                </tr>
-                            </thead>
-                            <tbody id="colab-table-body" class="divide-y divide-dark-700/50"></tbody>
-                        </table>
-                        <div id="no-demand-state" class="hidden p-12 text-center text-slate-500">
-                            <span class="text-4xl text-slate-600 block mb-3"><i class="fa-solid fa-folder-open"></i></span>
-                            <p class="text-sm font-semibold">Nenhuma demanda ativa encontrada.</p>
-                        </div>
+            <div class="h-8 w-px bg-custom-border hidden md:block"></div>
+
+            <nav id="nav-operators-container" class="flex gap-1.5 bg-canvas p-1 rounded-xl border border-custom-border text-xs">
+                <button onclick="switchOperator('cobranca_ludmila')" id="nav-cobranca_ludmila" class="nav-tab px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                    <span>Painel Ludmila</span>
+                </button>
+                <button onclick="switchOperator('cobranca_lucas')" id="nav-cobranca_lucas" class="nav-tab px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                    <span>Painel Lucas</span>
+                </button>
+                <button onclick="switchOperator('financeiro_lorena')" id="nav-financeiro_lorena" class="nav-tab px-3.5 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                    <i data-lucide="wallet" class="w-4 h-4"></i>
+                    <span>Painel Lorena (Financeiro)</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div id="supervisor-actions" class="flex items-center gap-3">
+                <button onclick="openModal('import-modal')" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95">
+                    <i data-lucide="file-up" class="w-4 h-4"></i>
+                    <span>Subir Demanda (CSV/XLS)</span>
+                </button>
+
+                <button onclick="openModal('column-modal')" class="px-3.5 py-2 bg-canvas hover:bg-card border border-custom-border text-slate-300 font-semibold text-xs rounded-lg flex items-center gap-2 transition-all active:scale-95">
+                    <i data-lucide="columns-3" class="w-4 h-4 text-purple-400"></i>
+                    <span>Gerenciar Colunas</span>
+                </button>
+            </div>
+
+            <button onclick="generateDailyReport()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-emerald-600/20 active:scale-95">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                <span>Gerar Relatório</span>
+            </button>
+
+            <button onclick="logout()" class="p-2 bg-canvas hover:bg-card border border-custom-border text-slate-400 hover:text-rose-400 rounded-lg transition-all" title="Sair do Sistema">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL CANVAS -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- SIDEBAR DE PERFORMANCE E INSTRUÇÕES -->
+        <aside class="w-80 bg-card border-r border-custom-border p-5 flex flex-col justify-between shrink-0 overflow-y-auto">
+            <div class="space-y-6">
+                <div class="p-4 bg-canvas rounded-2xl border border-custom-border relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none"></div>
+                    <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Painel Individual em Uso</div>
+                    <div id="operator-display-name" class="text-xl font-bold text-white mt-1 flex items-center gap-2">
+                        Ludmila
+                    </div>
+                    <div id="operator-display-role" class="text-xs text-blue-400 font-medium mt-0.5">Setor de Cobrança & Recuperação</div>
+                </div>
+
+                <div class="space-y-3 p-4 bg-canvas rounded-2xl border border-custom-border">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-medium">Progresso da Carteira</span>
+                        <span id="op-progress-percent" class="text-blue-400 font-bold text-sm">0%</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-card rounded-full overflow-hidden border border-custom-border">
+                        <div id="op-progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-emerald-500 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] text-slate-500 font-mono pt-1">
+                        <span>Demandas Concluídas</span>
+                        <span id="op-progress-count" class="font-bold text-slate-300">0 / 0</span>
+                    </div>
+                </div>
+
+                <div id="panel-lorena-rules" class="hidden space-y-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                    <div class="flex items-center gap-2 text-amber-400 text-xs font-bold">
+                        <i data-lucide="shield-alert" class="w-4 h-4"></i> Regras Financeiras Vigentes
+                    </div>
+                    <ul class="text-[11px] text-amber-200/80 space-y-2 list-disc list-inside leading-relaxed">
+                        <li><strong>Até 2 parcelas em atraso:</strong> Desconto máximo de até 30% à vista.</li>
+                        <li><strong>3 ou mais parcelas:</strong> Desconto de até 60% à vista.</li>
+                        <li><strong>Histórico positivo:</strong> Liberado flexibilização na alça de entrada.</li>
+                        <li><strong>Casos críticos:</strong> Encaminhar diretamente para análise Master.</li>
+                    </ul>
+                </div>
+
+                <div id="panel-cobranca-filters" class="space-y-3">
+                    <div class="text-xs text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                        <span>Filtrar por Modalidade</span>
+                        <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-500"></i>
+                    </div>
+                    <div class="space-y-1.5">
+                        <button onclick="filterModalidade('todos')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas border border-custom-border text-slate-200 hover:border-blue-500/50 transition-all flex items-center justify-between">
+                            <span>Todos os Registros</span>
+                            <span id="badge-count-todos" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">0</span>
+                        </button>
+                        <button onclick="filterModalidade('caixa')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
+                            <span>Caixa</span>
+                            <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-semibold">Ativo</span>
+                        </button>
+                        <button onclick="filterModalidade('agendamento')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
+                            <span>Agendamentos</span>
+                            <span class="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-full font-semibold">Promessa</span>
+                        </button>
+                        <button onclick="filterModalidade('novas')" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-medium text-left bg-canvas border border-custom-border text-slate-400 hover:text-slate-200 transition-all flex items-center justify-between">
+                            <span>Novas Cobranças</span>
+                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-semibold">Entrantes</span>
+                        </button>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
 
-    <!-- PAINEL DO SUPERVISOR (ADMIN) -->
-    <div id="supervisor-panel" class="hidden flex-grow flex flex-col md:flex-row h-screen overflow-hidden">
-        <aside class="w-full md:w-80 bg-dark-800 border-r border-dark-700 flex flex-col justify-between">
-            <div class="p-6">
-                <div class="flex items-center gap-3.5 pb-6 border-b border-dark-700">
-                    <div class="w-12 h-12 bg-brand text-dark-900 rounded-xl flex items-center justify-center text-xl font-black">
-                        <i class="fa-solid fa-user-shield"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-extrabold text-white text-base">Supervisor Geral</h2>
-                        <span class="text-[10px] uppercase font-bold tracking-widest text-brand">Painel de Controle</span>
-                    </div>
-                </div>
-
-                <nav class="mt-8 space-y-2">
-                    <button onclick="switchAdminTab('overview')" id="btn-tab-overview" class="w-full flex items-center gap-3 px-4 py-3 text-brand bg-brand/10 border-l-4 border-brand rounded-r transition font-semibold text-xs">
-                        <i class="fa-solid fa-chart-line"></i> Dashboard & Metas
-                    </button>
-                    <button onclick="switchAdminTab('templates')" id="btn-tab-templates" class="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-dark-700/50 rounded transition font-semibold text-xs">
-                        <i class="fa-solid fa-comment-dots"></i> Modelos de Mensagem
-                    </button>
-                    <button onclick="switchAdminTab('upload')" id="btn-tab-upload" class="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-dark-700/50 rounded transition font-semibold text-xs">
-                        <i class="fa-solid fa-file-csv"></i> Subir Planilha CSV
-                    </button>
-                    <button onclick="switchAdminTab('whitelabel')" id="btn-tab-whitelabel" class="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-dark-700/50 rounded transition font-semibold text-xs">
-                        <i class="fa-solid fa-paint-brush"></i> Personalizar Marca
-                    </button>
-                </nav>
-            </div>
-
-            <div class="p-6 border-t border-dark-700 space-y-3">
-                <button onclick="exportarCSV()" class="w-full py-2.5 bg-dark-700 hover:bg-dark-600 border border-dark-600 text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-excel text-green-500"></i> Exportar CSV/Excel
-                </button>
-                <button onclick="logout()" class="flex items-center justify-center gap-2 text-slate-400 hover:text-red-400 transition text-xs font-bold w-full py-2.5 rounded-lg border border-dark-700 hover:border-red-500/20 bg-dark-900/50">
-                    <i class="fa-solid fa-sign-out-alt"></i> Encerrar Sessão
-                </button>
+            <div class="pt-6 border-t border-custom-border text-[11px] text-slate-500 text-center font-mono">
+                CS DEV Framework • Operational System
             </div>
         </aside>
 
-        <main class="flex-grow flex flex-col overflow-hidden bg-dark-900">
-            <!-- ABA 1: DASHBOARD & METAS -->
-            <div id="admin-tab-overview" class="flex-grow flex flex-col overflow-hidden">
-                <header class="bg-dark-800 border-b border-dark-700 p-6">
-                    <h1 class="text-xl font-extrabold text-white">Dashboard Operacional & Gestão de Metas</h1>
-                    <p class="text-xs text-slate-400 mt-1">Acompanhe métricas em tempo real, metas financeiras e comissões da equipe.</p>
-                </header>
-
-                <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <div class="bg-dark-800 border border-dark-700 p-5 rounded-2xl">
-                            <span class="text-slate-500 uppercase font-bold text-[10px] tracking-wider">Total em Carteira</span>
-                            <div id="total-val-card" class="text-2xl font-black text-white mt-1">R$ 0,00</div>
-                            <span id="total-demands-card" class="text-[10px] text-slate-400">0 clientes</span>
-                        </div>
-                        <div class="bg-dark-800 border border-dark-700 p-5 rounded-2xl">
-                            <span class="text-slate-500 uppercase font-bold text-[10px] tracking-wider">Total Recuperado</span>
-                            <div id="total-recovered-card" class="text-2xl font-black text-green-500 mt-1">R$ 0,00</div>
-                            <span id="total-completed-card" class="text-[10px] text-green-400/80">0 finalizados</span>
-                        </div>
-                        <div class="bg-dark-800 border border-dark-700 p-5 rounded-2xl">
-                            <span class="text-slate-500 uppercase font-bold text-[10px] tracking-wider">Pendente em Cobrança</span>
-                            <div id="total-pending-val-card" class="text-2xl font-black text-brand mt-1">R$ 0,00</div>
-                            <span id="total-pending-card" class="text-[10px] text-slate-400">0 em andamento</span>
-                        </div>
-                        <div class="bg-dark-800 border border-dark-700 p-5 rounded-2xl">
-                            <span class="text-slate-500 uppercase font-bold text-[10px] tracking-wider">Taxa de Conversão</span>
-                            <div id="conversion-rate-card" class="text-2xl font-black text-amber-400 mt-1">0%</div>
-                            <span class="text-[10px] text-slate-400">Eficiência geral</span>
-                        </div>
+        <!-- DATA CANVAS & TABELA DEDICADA -->
+        <main class="flex-1 flex flex-col bg-canvas overflow-hidden p-6 space-y-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="p-4 bg-card border border-custom-border rounded-2xl flex items-center justify-between shadow-lg">
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Demandas Atribuídas</div>
+                        <div id="kpi-total" class="text-2xl font-extrabold text-white mt-1">0</div>
                     </div>
-
-                    <!-- Configuração de Metas Globais -->
-                    <div class="bg-dark-800 border border-dark-700 p-6 rounded-2xl space-y-4">
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2"><i class="fa-solid fa-bullseye text-brand"></i> Configuração de Meta & Comissão Geral</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Meta Mensal da Equipe (R$)</label>
-                                <input type="number" id="goal-target-val" placeholder="Ex: 50000" onchange="salvarMetas()"
-                                       class="w-full bg-dark-900 border border-dark-600 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Comissão sobre Recuperado (%)</label>
-                                <input type="number" id="goal-commission-rate" placeholder="Ex: 2.5" step="0.1" onchange="salvarMetas()"
-                                       class="w-full bg-dark-900 border border-dark-600 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-brand">
-                            </div>
-                        </div>
+                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
+                        <i data-lucide="layers" class="w-5 h-5"></i>
                     </div>
+                </div>
 
-                    <!-- Progresso por Colaborador -->
-                    <div class="bg-dark-800 border border-dark-700 p-6 rounded-2xl space-y-6">
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-white border-b border-dark-700 pb-3"><i class="fa-solid fa-users mr-2 text-brand"></i> Desempenho por Operador</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="team-stats-container"></div>
+                <div class="p-4 bg-card border border-custom-border rounded-2xl flex items-center justify-between shadow-lg">
+                    <div>
+                        <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Demandas No Prazo</div>
+                        <div id="kpi-noprazo" class="text-2xl font-extrabold text-emerald-400 mt-1">0</div>
+                    </div>
+                    <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-card border border-custom-border rounded-2xl flex items-center justify-between shadow-lg">
+                    <div>
+                        <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Atenção / Risco</div>
+                        <div id="kpi-atencao" class="text-2xl font-extrabold text-amber-400 mt-1">0</div>
+                    </div>
+                    <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+                        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-card border border-custom-border rounded-2xl flex items-center justify-between shadow-lg">
+                    <div>
+                        <div class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Prazo Esgotado / Crítico</div>
+                        <div id="kpi-esgotado" class="text-2xl font-extrabold text-rose-400 mt-1">0</div>
+                    </div>
+                    <div class="p-3 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20">
+                        <i data-lucide="clock" class="w-5 h-5"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA 2: TEMPLATES DE MENSAGEM -->
-            <div id="admin-tab-templates" class="hidden flex-grow flex flex-col overflow-hidden">
-                <header class="bg-dark-800 border-b border-dark-700 p-6">
-                    <h1 class="text-xl font-extrabold text-white">Modelos de Mensagem WhatsApp</h1>
-                    <p class="text-xs text-slate-400 mt-1">Personalize os disparos com tags dinâmicas: `{nome}`, `{valor}`, `{chave_pix}`.</p>
-                </header>
+            <div class="flex items-center justify-between gap-4">
+                <div class="relative flex-1 max-w-md">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="search-input" onkeyup="renderTable()" placeholder="Buscar cliente por nome..." class="w-full bg-card border border-custom-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-all shadow-inner">
+                </div>
 
-                <div class="flex-1 overflow-y-auto p-6 max-w-3xl mx-auto w-full space-y-6">
-                    <div class="bg-dark-800 border border-dark-700 p-6 rounded-2xl space-y-4 shadow-lg">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Etapa 1: Lembrete Amigável</label>
-                            <textarea id="tpl-stage-1" class="w-full bg-dark-900 border border-dark-600 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand h-20 resize-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Etapa 2: Cobrança Padrão com PIX</label>
-                            <textarea id="tpl-stage-2" class="w-full bg-dark-900 border border-dark-600 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand h-20 resize-none"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Etapa 3: Aviso Urgente</label>
-                            <textarea id="tpl-stage-3" class="w-full bg-dark-900 border border-dark-600 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand h-20 resize-none"></textarea>
-                        </div>
-                        <button onclick="salvarTemplates()" class="w-full bg-brand hover:opacity-90 text-dark-900 font-extrabold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-save"></i> Salvar Modelos
-                        </button>
-                    </div>
+                <div class="flex items-center gap-3">
+                    <select id="filter-sla" onchange="renderTable()" class="bg-card border border-custom-border text-slate-300 text-xs rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 shadow-sm font-medium">
+                        <option value="todos">Todos os Status SLA / Prazo</option>
+                        <option value="NO PRAZO">🟢 NO PRAZO</option>
+                        <option value="ATENÇÃO">🟡 ATENÇÃO</option>
+                        <option value="CUIDADO PRAZO ESTOURANDO">🟧 CUIDADO PRAZO ESTOURANDO</option>
+                        <option value="QUASE ESGOTADO">🔴 QUASE ESGOTADO</option>
+                        <option value="PRAZO ESGOTADO">🟣 PRAZO ESGOTADO</option>
+                        <option value="ABERTURA">🔵 ABERTURA</option>
+                        <option value="ERRO NA SLA AVANÇAR">⬛ ERRO NA SLA AVANÇAR</option>
+                        <option value="SLA">🟪 SLA</option>
+                    </select>
+
+                    <button onclick="renderTable()" class="p-2.5 bg-card hover:bg-card-hover border border-custom-border text-slate-300 rounded-xl transition-all" title="Atualizar Tabela">
+                        <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- ABA 3: SUBIR PLANILHA CSV AUTOMÁTICA -->
-            <div id="admin-tab-upload" class="hidden flex-grow flex flex-col overflow-hidden">
-                <header class="bg-dark-800 border-b border-dark-700 p-6">
-                    <h1 class="text-xl font-extrabold text-white">Importação Automática de Planilhas</h1>
-                    <p class="text-xs text-slate-400 mt-1">Carregue arquivos .CSV para atribuir demandas em lote.</p>
-                </header>
-
-                <div class="flex-1 overflow-y-auto p-6 max-w-2xl mx-auto w-full space-y-6">
-                    <div class="bg-dark-800 border border-dark-700 p-6 rounded-2xl space-y-5 shadow-lg">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">1. Selecionar Destinatário</label>
-                            <select id="select-destinatario" class="w-full bg-dark-900 border border-dark-600 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand font-semibold transition">
-                                <option value="158">Josué (ID 158)</option>
-                                <option value="125">Lorena (ID 125)</option>
-                                <option value="122">Ludmila (ID 122)</option>
-                                <option value="164">Lucas (ID 164)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">2. Upload do Arquivo CSV</label>
-                            <div class="border-2 border-dashed border-dark-600 hover:border-brand rounded-2xl p-8 text-center bg-dark-900/50 transition cursor-pointer relative" onclick="document.getElementById('csv-file-input').click()">
-                                <i class="fa-solid fa-file-csv text-4xl text-brand mb-3 block"></i>
-                                <p class="text-xs font-bold text-white mb-1">Clique aqui para selecionar o arquivo .CSV</p>
-                                <p class="text-[10px] text-slate-500">Colunas suportadas: Nome, Telefone, Valor, Chave PIX</p>
-                                <input type="file" id="csv-file-input" accept=".csv" class="hidden" onchange="processarArquivoCSV(event)">
-                            </div>
-                            <div id="file-info" class="hidden mt-3 p-3 bg-dark-900 border border-dark-700 rounded-xl text-xs text-brand font-bold flex items-center justify-between">
-                                <span id="file-name">arquivo.csv</span>
-                                <span id="file-count" class="text-slate-400 font-normal">0 clientes detectados</span>
-                            </div>
-                        </div>
-
-                        <button onclick="importarDemandaCSV()" class="w-full bg-brand hover:opacity-90 text-dark-900 font-extrabold py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-cloud-upload-alt"></i> Processar e Atribuir Carteira
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA 4: WHITE LABEL & PALETA DE CORES COMPLETA -->
-            <div id="admin-tab-whitelabel" class="hidden flex-grow flex flex-col overflow-hidden">
-                <header class="bg-dark-800 border-b border-dark-700 p-6">
-                    <h1 class="text-xl font-extrabold text-white">Configurações White Label & Cores</h1>
-                    <p class="text-xs text-slate-400 mt-1">Adapte a marca e as cores do sistema para a identidade visual do cliente.</p>
-                </header>
-
-                <div class="flex-1 overflow-y-auto p-6 max-w-2xl mx-auto w-full space-y-6">
-                    <div class="bg-dark-800 border border-dark-700 p-6 rounded-2xl space-y-5 shadow-lg">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nome da Empresa / Sistema</label>
-                            <input type="text" id="wl-company-name" placeholder="Ex: CSDev Cobranças"
-                                   class="w-full bg-dark-900 border border-dark-600 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:border-brand font-semibold">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">URL da Logomarca (PNG/SVG transparente)</label>
-                            <input type="text" id="wl-logo-url" placeholder="https://suaempresa.com/logo.png"
-                                   class="w-full bg-dark-900 border border-dark-600 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:border-brand font-mono">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cor Principal da Marca</label>
-                            
-                            <!-- Presets Rápidos -->
-                            <div class="flex flex-wrap gap-2 mb-3">
-                                <button type="button" onclick="definirCor('#f97316')" class="w-8 h-8 rounded-lg bg-[#f97316] border-2 border-white/20 hover:scale-105 transition" title="Laranja Telecom"></button>
-                                <button type="button" onclick="definirCor('#2563eb')" class="w-8 h-8 rounded-lg bg-[#2563eb] border-2 border-white/20 hover:scale-105 transition" title="Azul Corporativo"></button>
-                                <button type="button" onclick="definirCor('#10b981')" class="w-8 h-8 rounded-lg bg-[#10b981] border-2 border-white/20 hover:scale-105 transition" title="Verde FinTech"></button>
-                                <button type="button" onclick="definirCor('#8b5cf6')" class="w-8 h-8 rounded-lg bg-[#8b5cf6] border-2 border-white/20 hover:scale-105 transition" title="Roxo Moderno"></button>
-                                <button type="button" onclick="definirCor('#ef4444')" class="w-8 h-8 rounded-lg bg-[#ef4444] border-2 border-white/20 hover:scale-105 transition" title="Vermelho Alerta"></button>
-                                <button type="button" onclick="definirCor('#06b6d4')" class="w-8 h-8 rounded-lg bg-[#06b6d4] border-2 border-white/20 hover:scale-105 transition" title="Ciano Tech"></button>
-                            </div>
-
-                            <!-- Color Picker e Hex Text -->
-                            <div class="flex gap-3 items-center">
-                                <input type="color" id="wl-brand-color" class="h-10 w-16 bg-dark-900 border border-dark-600 rounded-lg cursor-pointer" onchange="document.getElementById('wl-hex-input').value = this.value">
-                                <input type="text" id="wl-hex-input" placeholder="#f97316" oninput="document.getElementById('wl-brand-color').value = this.value"
-                                       class="w-32 bg-dark-900 border border-dark-600 rounded-xl py-2 px-3 text-xs text-white font-mono focus:outline-none focus:border-brand">
-                                <span class="text-[11px] text-slate-400">Escolha a cor primária exata.</span>
-                            </div>
-                        </div>
-
-                        <button onclick="salvarConfigWhiteLabel()" class="w-full bg-brand hover:opacity-90 text-dark-900 font-extrabold py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-save"></i> Aplicar Alterações
-                        </button>
-                    </div>
-                </div>
+            <div class="flex-1 bg-card rounded-2xl border border-custom-border overflow-auto shadow-2xl relative">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead class="bg-canvas/90 backdrop-blur border-b border-custom-border sticky top-0 z-10 text-slate-400 uppercase font-bold text-[10px] tracking-wider">
+                        <tr id="table-header"></tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-custom-border text-slate-300"></tbody>
+                </table>
             </div>
         </main>
     </div>
 
-    <!-- MODAL PIX -->
-    <div id="modal-pix" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-dark-800 border border-dark-600 p-6 rounded-2xl w-full max-w-md relative text-center">
-            <h3 class="text-lg font-extrabold text-white mb-2"><i class="fa-brands fa-pix text-green-400 mr-2"></i> Chave PIX de Pagamento</h3>
-            <p class="text-xs text-slate-400 mb-4">Copie a chave abaixo para envio rápido ao cliente.</p>
-
-            <div class="bg-dark-900 p-3 rounded-xl border border-dark-700 font-mono text-xs text-brand break-all mb-6" id="pix-key-display">
-                ---
+    <!-- MODAL IMPORTAÇÃO -->
+    <div id="import-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-card border border-custom-border rounded-2xl p-6 w-full max-w-lg space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-custom-border pb-4">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i data-lucide="file-up" class="w-5 h-5 text-blue-400"></i>
+                    <span>Importar Planilha de Clientes (CSV / XLS)</span>
+                </h3>
+                <button onclick="closeModal('import-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-canvas transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
 
-            <div class="flex gap-3 justify-end">
-                <button onclick="fecharModalPix()" class="px-4 py-2 bg-dark-700 text-slate-300 rounded-xl text-xs font-bold hover:bg-dark-600">Fechar</button>
-                <button onclick="copiarChavePix()" class="px-4 py-2 bg-brand text-dark-900 font-bold rounded-xl text-xs hover:opacity-90 flex items-center gap-1.5">
-                    <i class="fa-regular fa-copy"></i> Copiar Chave
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Selecione o Arquivo Excel ou CSV</label>
+                    <input type="file" id="file-input" accept=".csv, .xlsx, .xls" class="w-full bg-canvas border border-custom-border text-slate-300 text-xs rounded-xl p-2.5 file:mr-4 file:py-1.5 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Data Padrão da Carga</label>
+                    <input type="date" id="import-date" class="w-full bg-canvas border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Destinar Carteira Para:</label>
+                    <select id="import-target" onchange="toggleDivisionInfo()" class="w-full bg-canvas border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-medium">
+                        <option value="cobranca_ludmila">Somente Painel da Ludmila</option>
+                        <option value="cobranca_lucas">Somente Painel do Lucas</option>
+                        <option value="financeiro_lorena">Somente Painel da Lorena (Financeiro)</option>
+                        <option value="divide_equal">Dividir 50/50 Igualmente (Ludmila e Lucas)</option>
+                    </select>
+                </div>
+
+                <div id="division-info-box" class="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs text-blue-300 hidden">
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="info" class="w-4 h-4 text-blue-400 shrink-0 mt-0.5"></i>
+                        <span>A planilha será distribuída alternadamente em partes iguais (1 para Ludmila, 1 para Lucas) de forma automática.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border">
+                <button onclick="closeModal('import-modal')" class="px-4 py-2.5 bg-canvas hover:bg-card border border-custom-border text-slate-300 text-xs rounded-xl font-semibold transition-all">Cancelar</button>
+                <button onclick="processImportFile()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Processar Importação</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAIS DE RELATÓRIO E NOTIFICAÇÃO -->
-    <div id="modal-relatorio-un" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-dark-800 border border-dark-600 p-6 rounded-2xl w-full max-w-lg relative">
-            <h3 class="text-lg font-extrabold text-white mb-4"><i class="fa-solid fa-file-invoice mr-2 text-brand"></i> Relatório do Cliente</h3>
-            <div class="bg-dark-900 rounded-xl p-4 border border-dark-700 mb-6">
-                <pre id="text-relatorio-un" class="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed"></pre>
+    <!-- MODAL GERENCIAR COLUNAS -->
+    <div id="column-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-card border border-custom-border rounded-2xl p-6 w-full max-w-md space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-custom-border pb-4">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i data-lucide="columns-3" class="w-5 h-5 text-purple-400"></i>
+                    <span>Gerenciador de Colunas Master</span>
+                </h3>
+                <button onclick="closeModal('column-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-canvas transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
-            <div class="flex gap-3 justify-end">
-                <button onclick="fecharModalUn()" class="px-4 py-2 bg-dark-700 text-slate-300 rounded-xl text-xs font-bold hover:bg-dark-600">Fechar</button>
-                <button onclick="copiarTextoUn()" class="px-4 py-2 bg-brand text-dark-900 font-bold rounded-xl text-xs hover:opacity-90 flex items-center gap-1.5"><i class="fa-regular fa-copy"></i> Copiar</button>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Nome do Novo Campo</label>
+                    <input type="text" id="new-col-name" placeholder="Ex: Valor Cobrado, Retorno Agendado..." class="w-full bg-canvas border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-400 block mb-1.5">Tipo do Campo</label>
+                    <select id="new-col-type" class="w-full bg-canvas border border-custom-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500 font-medium">
+                        <option value="text">Texto Livre</option>
+                        <option value="date">Data</option>
+                        <option value="badge">Badge Destacada</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border">
+                <button onclick="closeModal('column-modal')" class="px-4 py-2.5 bg-canvas hover:bg-card border border-custom-border text-slate-300 text-xs rounded-xl font-semibold transition-all">Cancelar</button>
+                <button onclick="addNewColumn()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-purple-600/20 transition-all">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Adicionar Coluna</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="modal-relatorio-geral" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-dark-800 border border-dark-600 p-6 rounded-2xl w-full max-w-xl relative">
-            <h3 class="text-lg font-extrabold text-white mb-4"><i class="fa-solid fa-copy mr-2 text-brand"></i> Relatório Geral de Atividades</h3>
-            <div class="bg-dark-900 rounded-xl p-4 border border-dark-700 mb-6">
-                <pre id="text-relatorio-geral" class="text-xs text-slate-300 font-mono h-80 overflow-y-auto whitespace-pre-wrap leading-relaxed"></pre>
+    <!-- MODAL RELATÓRIO DIÁRIO -->
+    <div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-card border border-custom-border rounded-2xl p-6 w-full max-w-lg space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-custom-border pb-4">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-5 h-5 text-emerald-400"></i>
+                    <span>Relatório Diário Automatizado</span>
+                </h3>
+                <button onclick="closeModal('report-modal')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-canvas transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
-            <div class="flex gap-3 justify-end">
-                <button onclick="fecharModalGeral()" class="px-4 py-2 bg-dark-700 text-slate-300 rounded-xl text-xs font-bold hover:bg-dark-600">Fechar</button>
-                <button onclick="copiarTextoGeral()" class="px-4 py-2 bg-brand text-dark-900 font-bold rounded-xl text-xs hover:opacity-90 flex items-center gap-1.5"><i class="fa-regular fa-copy"></i> Copiar</button>
+
+            <textarea id="report-text" readonly class="w-full h-72 bg-canvas border border-custom-border rounded-xl p-4 text-xs font-mono text-emerald-300 focus:outline-none resize-none leading-relaxed shadow-inner"></textarea>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-custom-border">
+                <button onclick="closeModal('report-modal')" class="px-4 py-2.5 bg-canvas hover:bg-card border border-custom-border text-slate-300 text-xs rounded-xl font-semibold transition-all">Fechar</button>
+                <button onclick="copyReportText()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span>Copiar Texto</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="opacity-0 pointer-events-none fixed bottom-6 right-6 bg-brand text-dark-900 font-bold px-5 py-3 rounded-xl shadow-2xl transition-all duration-300 flex items-center gap-2 z-50 text-xs tracking-wider uppercase">
-        <i class="fa-solid fa-circle-check"></i> <span id="toast-message">Notificação</span>
-    </div>
-
-    <footer id="footer-text" class="bg-dark-900 py-4 border-t border-dark-700 text-center text-[10px] text-slate-600">
-        © 2026 CSDev Solutions. Painel do Gestor de Cobrança.
-    </footer>
-
-    <!-- LÓGICA E ESTADO DA APLICAÇÃO -->
+    <!-- JAVASCRIPT MASTER COM AUTH & PERMISSÕES -->
     <script>
-        const COLABORADORES = {
-            "158": { name: "Josué", id: "158" },
-            "125": { name: "Lorena", id: "125" },
-            "122": { name: "Ludmila", id: "122" },
-            "164": { name: "Lucas", id: "164" }
+        const SUPERVISOR_PIN = "2522";
+        let isSupervisor = false;
+        let currentOperator = 'cobranca_ludmila';
+        let currentModalidade = 'todos';
+
+        const SLA_OPTIONS = [
+            'NO PRAZO', 'ATENÇÃO', 'CUIDADO PRAZO ESTOURANDO', 'QUASE ESGOTADO',
+            'PRAZO ESGOTADO', 'ABERTURA', 'ERRO NA SLA AVANÇAR', 'SLA'
+        ];
+
+        const SLA_BADGE_STYLES = {
+            'NO PRAZO': 'bg-emerald-900/80 text-emerald-100 border border-emerald-500/30',
+            'ATENÇÃO': 'bg-amber-200 text-amber-950 font-bold',
+            'CUIDADO PRAZO ESTOURANDO': 'bg-orange-300 text-orange-950 font-bold',
+            'QUASE ESGOTADO': 'bg-red-900 text-red-100 border border-red-500/30',
+            'PRAZO ESGOTADO': 'bg-purple-900 text-purple-100 border border-purple-500/30',
+            'ABERTURA': 'bg-blue-800 text-blue-100 border border-blue-400/30',
+            'ERRO NA SLA AVANÇAR': 'bg-zinc-800 text-zinc-300 border border-zinc-600',
+            'SLA': 'bg-purple-300 text-purple-950 font-bold'
         };
 
-        const SUPERVISOR_CODE = "2522";
-        let currentUser = null;
-        let parsedCSVData = [];
+        const ETAPAS_COBRANCA = [
+            'Etapa 1', 'Etapa 2', 'Etapa 3', 'Etapa 4', 'Etapa 5', 'Desativação', 'Continuidade', 'Em dias'
+        ];
 
-        let database = JSON.parse(localStorage.getItem('csdev_cobranca_db')) || {
-            clients: [],
-            userNotes: { "158": "", "125": "", "122": "", "164": "" },
-            goals: { target: 50000, commissionRate: 2.5 },
-            templates: {
-                stage1: "Olá {nome}, tudo bem? Lembramos que sua fatura no valor de R$ {valor} está disponível para pagamento.",
-                stage2: "Aviso de Débito: {nome}, regularize seu débito de R$ {valor}. Utilize a chave PIX: {chave_pix}",
-                stage3: "Urgente {nome}: Evite a suspensão do serviço quitando seu saldo pendente de R$ {valor} via PIX: {chave_pix}"
-            },
-            whiteLabel: { companyName: "CSDev Solutions", logoUrl: "", brandColor: "#f97316" }
+        let columnsConfig = {
+            cobranca: [
+                { id: 'prioridade', name: 'Prioridade de Atendimento' },
+                { id: 'dataAbertura', name: 'Data Abertura / Vencimento' },
+                { id: 'cliente', name: 'Nome do Cliente' },
+                { id: 'etapa', name: 'Etapa de Cobrança' },
+                { id: 'statusSLA', name: 'SLA / Prazo' },
+                { id: 'modalidade', name: 'Modalidade' },
+                { id: 'acoes', name: 'Ações' }
+            ],
+            financeiro: [
+                { id: 'etapa', name: 'Etapa / Assunto' },
+                { id: 'cliente', name: 'Nome do Cliente' },
+                { id: 'contato', name: 'Telefone Celular' },
+                { id: 'revertido', name: 'Revertido' },
+                { id: 'dataAbertura', name: 'Data de Contato' },
+                { id: 'acoes', name: 'Ações' }
+            ]
         };
 
-        aplicarWhiteLabel();
-        carregarTemplatesUI();
+        let dataset = [
+            { id: 101, operator: 'cobranca_ludmila', prioridade: 'ATENDIMENTO NORMAL', dataAbertura: '14/09/2026', cliente: 'VITORIA LAIS FERREIRA SILVA', modalidade: 'caixa', etapa: 'Etapa 2', statusSLA: 'NO PRAZO', finalizado: false },
+            { id: 102, operator: 'cobranca_ludmila', prioridade: 'URGENTE', dataAbertura: '14/09/2026', cliente: 'ANA CLARA SILVA COSTA', modalidade: 'caixa', etapa: 'Etapa 2', statusSLA: 'ATENÇÃO', finalizado: false },
+            { id: 103, operator: 'cobranca_lucas', prioridade: 'URGENTE', dataAbertura: '14/09/2026', cliente: 'JONAS DA SILVA LIMA', modalidade: 'agendamento', etapa: 'Etapa 3', statusSLA: 'QUASE ESGOTADO', finalizado: false },
+            { id: 104, operator: 'financeiro_lorena', prioridade: 'NORMAL', dataAbertura: '14/09/2026', cliente: 'VALDEMAR RODRIGUES DA SILVA', contato: '(61) 99999-8888', revertido: 'SIM', etapa: 'Em dias', statusSLA: 'NO PRAZO', finalizado: false }
+        ];
 
-        if (database.clients.length === 0) {
-            database.clients = [
-                { id: "c1", name: "Dr. Roberto Clínica", phone: "61991973020", value: 1250.00, pixKey: "financeiro@clinica.com", colabId: "122", stage: 3, status: "Está em caixa", progress: "finalizado" },
-                { id: "c2", name: "Imobiliária Prime", phone: "61988887777", value: 3400.50, pixKey: "00.123.456/0001-99", colabId: "164", stage: 2, status: "Sem retorno", progress: "Em andamento" }
-            ];
-            salvarDatabase();
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('import-date').value = today;
+            lucide.createIcons();
+        });
+
+        function togglePinInput() {
+            const user = document.getElementById('login-user').value;
+            const pinContainer = document.getElementById('pin-container');
+            if(user === 'supervisor') {
+                pinContainer.classList.remove('hidden');
+            } else {
+                pinContainer.classList.add('hidden');
+            }
         }
 
-        function salvarDatabase() { localStorage.setItem('csdev_cobranca_db', JSON.stringify(database)); }
+        function handleLogin() {
+            const user = document.getElementById('login-user').value;
+            const pin = document.getElementById('login-pin').value;
 
-        function definirCor(hex) {
-            document.getElementById('wl-brand-color').value = hex;
-            document.getElementById('wl-hex-input').value = hex;
-        }
-
-        function aplicarWhiteLabel() {
-            const wl = database.whiteLabel || { companyName: "CSDev Solutions", brandColor: "#f97316" };
-            document.documentElement.style.setProperty('--brand-color', wl.brandColor);
-            document.getElementById('company-name-display').innerHTML = wl.companyName;
-            document.getElementById('page-title').innerText = `${wl.companyName} | Painel Enterprise`;
-            document.getElementById('footer-text').innerText = `© 2026 ${wl.companyName}. Todos os direitos reservados.`;
-
-            if (wl.logoUrl) {
-                document.getElementById('company-logo-container').innerHTML = `<img src="${wl.logoUrl}" class="h-10 object-contain" alt="Logo">`;
+            if(user === 'supervisor') {
+                if(pin !== SUPERVISOR_PIN) {
+                    alert('PIN de Supervisor incorreto!');
+                    return;
+                }
+                isSupervisor = true;
+                document.getElementById('supervisor-actions').classList.remove('hidden');
+                document.getElementById('nav-operators-container').classList.remove('hidden');
+                switchOperator('cobranca_ludmila');
+            } else {
+                isSupervisor = false;
+                document.getElementById('supervisor-actions').classList.add('hidden');
+                document.getElementById('nav-operators-container').classList.add('hidden');
+                switchOperator(user);
             }
 
-            document.getElementById('wl-company-name').value = wl.companyName || "";
-            document.getElementById('wl-logo-url').value = wl.logoUrl || "";
-            document.getElementById('wl-brand-color').value = wl.brandColor || "#f97316";
-            document.getElementById('wl-hex-input').value = wl.brandColor || "#f97316";
-        }
-
-        function salvarConfigWhiteLabel() {
-            const corEscolhida = document.getElementById('wl-hex-input').value || document.getElementById('wl-brand-color').value;
-            database.whiteLabel = {
-                companyName: document.getElementById('wl-company-name').value || "CSDev Solutions",
-                logoUrl: document.getElementById('wl-logo-url').value || "",
-                brandColor: corEscolhida
-            };
-            salvarDatabase();
-            aplicarWhiteLabel();
-            showToast("Configurações Visuais Salvas!");
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
-            toast.classList.add('opacity-100');
-            setTimeout(() => { toast.classList.remove('opacity-100'); toast.classList.add('opacity-0', 'pointer-events-none'); }, 2500);
-        }
-
-        function realizarLogin() {
-            const val = document.getElementById('access-input').value.trim();
-            if (val === SUPERVISOR_CODE) {
-                currentUser = { name: "Supervisor", role: "admin" };
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('supervisor-panel').classList.remove('hidden');
-                renderizarAdminDashboard();
-                showToast("Sessão Gestor Iniciada");
-            } else if (COLABORADORES[val]) {
-                currentUser = { ...COLABORADORES[val], role: "colab" };
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('colaborador-panel').classList.remove('hidden');
-                document.getElementById('colab-name').innerText = currentUser.name;
-                document.getElementById('colab-id').innerText = `ID: ${currentUser.id}`;
-                document.getElementById('colab-notes').value = database.userNotes[currentUser.id] || "";
-                renderizarColabTable();
-                showToast(`Bem-vindo, ${currentUser.name}`);
-            } else { alert("Código incorreto."); }
+            document.getElementById('login-screen').classList.add('hidden');
         }
 
         function logout() {
-            currentUser = null;
-            document.getElementById('access-input').value = "";
-            document.getElementById('colaborador-panel').classList.add('hidden');
-            document.getElementById('supervisor-panel').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-pin').value = '';
         }
 
-        // --- PAINEL COLABORADOR & MENSAGENS COM TAGS ---
-        function renderizarColabTable() {
-            const tbody = document.getElementById('colab-table-body');
-            tbody.innerHTML = "";
-            const query = document.getElementById('search-client').value.toLowerCase();
-            const filterStatus = document.getElementById('filter-status').value;
+        function switchOperator(operatorKey) {
+            currentOperator = operatorKey;
 
-            let colabClients = database.clients.filter(c => c.colabId === currentUser.id);
-            const total = colabClients.length;
-            const finalizados = colabClients.filter(c => c.progress === "finalizado").length;
-            const pct = total > 0 ? Math.round((finalizados / total) * 100) : 0;
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('bg-blue-600/20', 'text-blue-400', 'border', 'border-blue-500/30', 'font-bold');
+                btn.classList.add('text-slate-400');
+            });
 
-            document.getElementById('colab-progress-text').innerText = `${finalizados} / ${total}`;
-            document.getElementById('colab-progress-percent').innerText = `${pct}%`;
-            document.getElementById('colab-progress-bar').style.width = `${pct}%`;
-
-            if (query) colabClients = colabClients.filter(c => c.name.toLowerCase().includes(query));
-            if (filterStatus !== "ALL") colabClients = colabClients.filter(c => c.status === filterStatus);
-
-            if (colabClients.length === 0) {
-                document.getElementById('no-demand-state').classList.remove('hidden');
-                return;
-            } else {
-                document.getElementById('no-demand-state').classList.add('hidden');
+            const activeBtn = document.getElementById(`nav-${operatorKey}`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-blue-600/20', 'text-blue-400', 'border', 'border-blue-500/30', 'font-bold');
+                activeBtn.classList.remove('text-slate-400');
             }
 
-            colabClients.forEach(c => {
+            const nameEl = document.getElementById('operator-display-name');
+            const roleEl = document.getElementById('operator-display-role');
+            const cobrancaFilters = document.getElementById('panel-cobranca-filters');
+            const lorenaRules = document.getElementById('panel-lorena-rules');
+
+            if(operatorKey === 'cobranca_ludmila') {
+                nameEl.textContent = 'Ludmila';
+                roleEl.textContent = 'Painel Exclusivo de Cobrança';
+                cobrancaFilters.classList.remove('hidden');
+                lorenaRules.classList.add('hidden');
+            } else if(operatorKey === 'cobranca_lucas') {
+                nameEl.textContent = 'Lucas';
+                roleEl.textContent = 'Painel Exclusivo de Cobrança';
+                cobrancaFilters.classList.remove('hidden');
+                lorenaRules.classList.add('hidden');
+            } else if(operatorKey === 'financeiro_lorena') {
+                nameEl.textContent = 'Lorena';
+                roleEl.textContent = 'Painel Exclusivo de Financeiro';
+                cobrancaFilters.classList.add('hidden');
+                lorenaRules.classList.remove('hidden');
+            }
+
+            renderTable();
+        }
+
+        function filterModalidade(mod) {
+            currentModalidade = mod;
+            renderTable();
+        }
+
+        function renderTable() {
+            const headerRow = document.getElementById('table-header');
+            const tableBody = document.getElementById('table-body');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            const slaFilter = document.getElementById('filter-sla').value;
+
+            headerRow.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            const isFinance = currentOperator.startsWith('financeiro');
+            const activeCols = isFinance ? columnsConfig.financeiro : columnsConfig.cobranca;
+
+            activeCols.forEach(col => {
+                const th = document.createElement('th');
+                th.className = 'py-3.5 px-4 font-bold text-slate-400';
+                th.textContent = col.name;
+                headerRow.appendChild(th);
+            });
+
+            const operatorData = dataset.filter(item => {
+                if(item.operator !== currentOperator) return false;
+                if(!isFinance && currentModalidade !== 'todos' && item.modalidade !== currentModalidade) return false;
+                if(slaFilter !== 'todos' && item.statusSLA !== slaFilter) return false;
+                if(searchVal && !item.cliente.toLowerCase().includes(searchVal)) return false;
+                return true;
+            });
+
+            const totalCount = operatorData.length;
+            const noPrazoCount = operatorData.filter(i => i.statusSLA === 'NO PRAZO' || i.statusSLA === 'ABERTURA').length;
+            const atencaoCount = operatorData.filter(i => i.statusSLA === 'ATENÇÃO' || i.statusSLA === 'CUIDADO PRAZO ESTOURANDO').length;
+            const esgotadoCount = operatorData.filter(i => i.statusSLA === 'PRAZO ESGOTADO' || i.statusSLA === 'QUASE ESGOTADO').length;
+
+            document.getElementById('kpi-total').textContent = totalCount;
+            document.getElementById('kpi-noprazo').textContent = noPrazoCount;
+            document.getElementById('kpi-atencao').textContent = atencaoCount;
+            document.getElementById('kpi-esgotado').textContent = esgotadoCount;
+
+            const finalizados = operatorData.filter(i => i.finalizado).length;
+            const percent = totalCount > 0 ? Math.round((finalizados / totalCount) * 100) : 0;
+
+            document.getElementById('op-progress-percent').textContent = `${percent}%`;
+            document.getElementById('op-progress-bar').style.width = `${percent}%`;
+            document.getElementById('op-progress-count').textContent = `${finalizados} / ${totalCount}`;
+            if(document.getElementById('badge-count-todos')) {
+                document.getElementById('badge-count-todos').textContent = totalCount;
+            }
+
+            if(operatorData.length === 0) {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-dark-700/20 text-slate-200 transition-colors border-b border-dark-700/50 text-xs";
-                const valFormatado = (c.value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                tr.innerHTML = `<td colspan="${activeCols.length}" class="py-8 text-center text-slate-500 font-medium">Nenhum registro encontrado para este painel.</td>`;
+                tableBody.appendChild(tr);
+            } else {
+                operatorData.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = `bg-card-hover transition-colors ${row.finalizado ? 'opacity-40 bg-emerald-950/10' : ''}`;
 
-                tr.innerHTML = `
-                    <td class="p-4 font-bold text-white">${c.name}</td>
-                    <td class="p-4 text-slate-400 font-mono">${c.phone || '—'}</td>
-                    <td class="p-4 font-extrabold text-brand font-mono">${valFormatado}</td>
-                    <td class="p-4">
-                        <select onchange="updateClientData('${c.id}', 'stage', this.value)" class="bg-dark-900 border border-dark-600 rounded-lg py-1 px-2 text-xs text-brand font-bold focus:outline-none">
-                            <option value="1" ${c.stage == 1 ? 'selected' : ''}>Etapa 1 (Lembrete)</option>
-                            <option value="2" ${c.stage == 2 ? 'selected' : ''}>Etapa 2 (Cobrança)</option>
-                            <option value="3" ${c.stage == 3 ? 'selected' : ''}>Etapa 3 (Aviso)</option>
-                        </select>
-                    </td>
-                    <td class="p-4">
-                        <select onchange="updateClientData('${c.id}', 'status', this.value)" class="bg-dark-900 border border-dark-600 rounded-lg py-1 px-2 text-xs text-slate-300 focus:outline-none">
-                            <option value="Sem retorno" ${c.status === "Sem retorno" ? 'selected' : ''}>🚫 Sem retorno</option>
-                            <option value="Encaminhada mensagem no OPA" ${c.status === "Encaminhada mensagem no OPA" ? 'selected' : ''}>💬 Mensagem OPA</option>
-                            <option value="Ligação" ${c.status === "Ligação" ? 'selected' : ''}>📞 Ligação Realizada</option>
-                            <option value="Está em caixa" ${c.status === "Está em caixa" ? 'selected' : ''}>💰 Está em Caixa</option>
-                        </select>
-                    </td>
-                    <td class="p-4">
-                        <select onchange="updateClientData('${c.id}', 'progress', this.value)" class="bg-dark-900 border border-dark-600 rounded-lg py-1 px-2 text-xs font-semibold focus:outline-none ${c.progress === 'finalizado' ? 'text-green-500' : 'text-slate-400'}">
-                            <option value="não iniciado" ${c.progress === "não iniciado" ? 'selected' : ''}>⏳ Não Iniciado</option>
-                            <option value="Em andamento" ${c.progress === "Em andamento" ? 'selected' : ''}>⚡ Em Andamento</option>
-                            <option value="finalizado" ${c.progress === "finalizado" ? 'selected' : ''}>✅ Finalizado</option>
-                        </select>
-                    </td>
-                    <td class="p-4 text-center space-x-1">
-                        <button onclick="dispararWhatsApp('${c.id}')" class="px-2.5 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg text-[10px] font-bold transition" title="Disparar Mensagem">
-                            <i class="fa-brands fa-whatsapp text-sm"></i>
-                        </button>
-                        <button onclick="abrirModalPix('${c.pixKey || 'Não cadastrada'}')" class="px-2.5 py-1.5 bg-dark-700 hover:bg-dark-600 text-green-400 rounded-lg text-[10px] font-bold transition" title="Ver PIX">
-                            <i class="fa-brands fa-pix text-sm"></i>
-                        </button>
-                        <button onclick="abrirModalRelatorioUn('${c.id}')" class="px-2.5 py-1.5 bg-brand text-dark-900 rounded-lg text-[10px] font-black transition">
-                            <i class="fa-solid fa-copy"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                    activeCols.forEach(col => {
+                        const td = document.createElement('td');
+                        td.className = 'py-3.5 px-4 align-middle';
+
+                        if(col.id === 'statusSLA') {
+                            const badgeStyle = SLA_BADGE_STYLES[row.statusSLA] || 'bg-zinc-800 text-slate-200';
+                            let optionsHtml = SLA_OPTIONS.map(opt => 
+                                `<option value="${opt}" ${row.statusSLA === opt ? 'selected' : ''}>${opt}</option>`
+                            ).join('');
+
+                            td.innerHTML = `
+                                <select onchange="updateRowField(${row.id}, 'statusSLA', this.value)" class="badge-status ${badgeStyle} cursor-pointer border-0 outline-none focus:ring-2 focus:ring-blue-500">
+                                    ${optionsHtml}
+                                </select>
+                            `;
+                        } else if(col.id === 'etapa') {
+                            let optionsHtml = ETAPAS_COBRANCA.map(etp => 
+                                `<option value="${etp}" ${row.etapa === etp ? 'selected' : ''}>${etp}</option>`
+                            ).join('');
+
+                            td.innerHTML = `
+                                <select onchange="updateRowField(${row.id}, 'etapa', this.value)" class="bg-canvas border border-custom-border text-slate-300 text-xs rounded-lg px-2 py-1 font-semibold focus:outline-none focus:border-blue-500">
+                                    ${optionsHtml}
+                                </select>
+                            `;
+                        } else if(col.id === 'prioridade') {
+                            const isUrgente = row.prioridade === 'URGENTE';
+                            td.innerHTML = `
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-bold ${isUrgente ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
+                                    ${row.prioridade || 'ATENDIMENTO NORMAL'}
+                                </span>
+                            `;
+                        } else if(col.id === 'modalidade') {
+                            const modUpper = (row.modalidade || 'caixa').toUpperCase();
+                            td.innerHTML = `<span class="text-[11px] font-mono font-semibold text-slate-400 bg-canvas px-2.5 py-1 rounded-lg border border-custom-border">${modUpper}</span>`;
+                        } else if(col.id === 'acoes') {
+                            td.innerHTML = `
+                                <div class="flex items-center gap-2">
+                                    <button onclick="toggleFinalize(${row.id})" class="p-1.5 ${row.finalizado ? 'bg-emerald-600 text-white' : 'bg-canvas hover:bg-emerald-600/20 text-slate-400 hover:text-emerald-400'} border border-custom-border rounded-lg transition-all" title="Concluir Demanda">
+                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    ${isSupervisor ? `
+                                    <button onclick="deleteRow(${row.id})" class="p-1.5 bg-canvas hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 border border-custom-border rounded-lg transition-all" title="Excluir Registro">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>` : ''}
+                                </div>
+                            `;
+                        } else {
+                            td.contentEditable = "true";
+                            td.className += " editable-cell rounded px-2 py-1 focus:bg-canvas";
+                            td.textContent = row[col.id] || '-';
+                            td.onblur = (e) => {
+                                row[col.id] = e.target.textContent;
+                            };
+                        }
+
+                        tr.appendChild(td);
+                    });
+
+                    tableBody.appendChild(tr);
+                });
+            }
+
+            lucide.createIcons();
         }
 
-        function updateClientData(id, key, val) {
-            const index = database.clients.findIndex(c => c.id === id);
-            if (index !== -1) {
-                database.clients[index][key] = (key === 'stage') ? parseInt(val) : val;
-                salvarDatabase();
-                renderizarColabTable();
+        function updateRowField(id, field, value) {
+            const item = dataset.find(i => i.id === id);
+            if(item) {
+                item[field] = value;
+                renderTable();
             }
         }
 
-        function dispararWhatsApp(id) {
-            const client = database.clients.find(c => c.id === id);
-            if (!client || !client.phone) return;
-
-            let tel = client.phone.replace(/\D/g, '');
-            if (!tel.startsWith("55") && tel.length >= 10) tel = "55" + tel;
-
-            let template = database.templates[`stage${client.stage}`] || database.templates.stage1;
-            const valFmt = (client.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-
-            let msg = template
-                .replace(/{nome}/g, client.name)
-                .replace(/{valor}/g, valFmt)
-                .replace(/{chave_pix}/g, client.pixKey || "Chave sob consulta");
-
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+        function toggleFinalize(id) {
+            const item = dataset.find(i => i.id === id);
+            if(item) {
+                item.finalizado = !item.finalizado;
+                renderTable();
+            }
         }
 
-        // --- SISTEMA PIX ---
-        function abrirModalPix(chave) {
-            document.getElementById('pix-key-display').innerText = chave;
-            document.getElementById('modal-pix').classList.remove('hidden');
-        }
-        function fecharModalPix() { document.getElementById('modal-pix').classList.add('hidden'); }
-        function copiarChavePix() {
-            const chave = document.getElementById('pix-key-display').innerText;
-            navigator.clipboard.writeText(chave);
-            showToast("Chave PIX copiada!");
-            fecharModalPix();
+        function deleteRow(id) {
+            if(confirm('Tem certeza que deseja excluir este registro?')) {
+                dataset = dataset.filter(i => i.id !== id);
+                renderTable();
+            }
         }
 
-        // --- SISTEMA SUPERVISOR, METAS & TEMPLATES ---
-        function switchAdminTab(tab) {
-            ['overview', 'templates', 'upload', 'whitelabel'].forEach(t => {
-                document.getElementById(`admin-tab-${t}`).classList.add('hidden');
-                document.getElementById(`btn-tab-${t}`).className = "w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-dark-700/50 rounded transition font-semibold text-xs";
-            });
-            document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${tab}`).className = "w-full flex items-center gap-3 px-4 py-3 text-brand bg-brand/10 border-l-4 border-brand rounded-r transition font-semibold text-xs";
-            if (tab === 'overview') renderizarAdminDashboard();
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        function salvarMetas() {
-            database.goals = {
-                target: parseFloat(document.getElementById('goal-target-val').value) || 0,
-                commissionRate: parseFloat(document.getElementById('goal-commission-rate').value) || 0
-            };
-            salvarDatabase();
-            renderizarAdminDashboard();
-            showToast("Metas Atualizadas!");
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
         }
 
-        function carregarTemplatesUI() {
-            document.getElementById('goal-target-val').value = database.goals?.target || 50000;
-            document.getElementById('goal-commission-rate').value = database.goals?.commissionRate || 2.5;
-
-            document.getElementById('tpl-stage-1').value = database.templates?.stage1 || "";
-            document.getElementById('tpl-stage-2').value = database.templates?.stage2 || "";
-            document.getElementById('tpl-stage-3').value = database.templates?.stage3 || "";
+        function toggleDivisionInfo() {
+            const target = document.getElementById('import-target').value;
+            const infoBox = document.getElementById('division-info-box');
+            if(target === 'divide_equal') {
+                infoBox.classList.remove('hidden');
+            } else {
+                infoBox.classList.add('hidden');
+            }
         }
 
-        function salvarTemplates() {
-            database.templates = {
-                stage1: document.getElementById('tpl-stage-1').value,
-                stage2: document.getElementById('tpl-stage-2').value,
-                stage3: document.getElementById('tpl-stage-3').value
-            };
-            salvarDatabase();
-            showToast("Modelos de Mensagem Salvos!");
-        }
+        function processImportFile() {
+            const fileInput = document.getElementById('file-input');
+            const target = document.getElementById('import-target').value;
+            const dateVal = document.getElementById('import-date').value;
 
-        function renderizarAdminDashboard() {
-            const totalClients = database.clients.length;
-            const completedClients = database.clients.filter(c => c.progress === 'finalizado').length;
-            const totalVal = database.clients.reduce((acc, c) => acc + (c.value || 0), 0);
-            const recoveredVal = database.clients.filter(c => c.status === 'Está em caixa' || c.progress === 'finalizado').reduce((acc, c) => acc + (c.value || 0), 0);
-            const pendingVal = totalVal - recoveredVal;
-            const convRate = totalClients > 0 ? Math.round((completedClients / totalClients) * 100) : 0;
+            if(!fileInput.files.length) {
+                alert('Por favor, selecione um arquivo de planilha CSV ou Excel.');
+                return;
+            }
 
-            const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const file = fileInput.files[0];
+            const reader = new FileReader();
 
-            document.getElementById('total-val-card').innerText = fmt(totalVal);
-            document.getElementById('total-demands-card').innerText = `${totalClients} clientes`;
-            document.getElementById('total-recovered-card').innerText = fmt(recoveredVal);
-            document.getElementById('total-completed-card').innerText = `${completedClients} finalizados`;
-            document.getElementById('total-pending-val-card').innerText = fmt(pendingVal);
-            document.getElementById('conversion-rate-card').innerText = `${convRate}%`;
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheet];
+                const json = XLSX.utils.sheet_to_json(worksheet);
 
-            // Cards Individuais da Equipe
-            const container = document.getElementById('team-stats-container');
-            container.innerHTML = "";
-
-            Object.keys(COLABORADORES).forEach(id => {
-                const colab = COLABORADORES[id];
-                const clients = database.clients.filter(c => c.colabId === id);
-                const rec = clients.filter(c => c.status === 'Está em caixa' || c.progress === 'finalizado').reduce((acc, c) => acc + (c.value || 0), 0);
-                const commission = (rec * (database.goals?.commissionRate || 0)) / 100;
-                const pctGoal = (database.goals?.target || 0) > 0 ? Math.min(100, Math.round((rec / database.goals.target) * 100)) : 0;
-
-                container.innerHTML += `
-                    <div class="bg-dark-900 p-5 rounded-xl border border-dark-700 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="font-extrabold text-white text-sm">${colab.name} (ID ${colab.id})</span>
-                            <span class="text-xs font-bold text-brand">${pctGoal}% da Meta</span>
-                        </div>
-                        <div class="w-full bg-dark-700 h-2 rounded-full overflow-hidden">
-                            <div class="bg-brand h-full rounded-full transition-all duration-300" style="width: ${pctGoal}%"></div>
-                        </div>
-                        <div class="flex justify-between text-[11px] text-slate-400 font-mono">
-                            <span>Recuperado: <strong class="text-green-400">${fmt(rec)}</strong></span>
-                            <span>Comissão Est.: <strong class="text-brand">${fmt(commission)}</strong></span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // CSV Import/Export
-        function processarArquivoCSV(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            Papa.parse(file, {
-                header: false,
-                skipEmptyLines: true,
-                complete: function(res) {
-                    parsedCSVData = res.data;
-                    document.getElementById('file-info').classList.remove('hidden');
-                    document.getElementById('file-name').innerText = file.name;
-                    document.getElementById('file-count').innerText = `${parsedCSVData.length} registros`;
+                if(!json.length) {
+                    alert('Nenhum dado encontrado na planilha importada.');
+                    return;
                 }
-            });
-        }
 
-        function importarDemandaCSV() {
-            const colabId = document.getElementById('select-destinatario').value;
-            if (parsedCSVData.length === 0) return alert("Selecione um CSV válido.");
+                let operatorToggle = 0;
 
-            database.clients = database.clients.filter(c => c.colabId !== colabId);
-            parsedCSVData.forEach((row, i) => {
-                database.clients.push({
-                    id: `cl_${colabId}_${Date.now()}_${i}`,
-                    name: row[0] ? row[0].trim() : "Cliente",
-                    phone: row[1] ? row[1].trim() : "",
-                    value: parseFloat(row[2]) || 0,
-                    pixKey: row[3] ? row[3].trim() : "",
-                    colabId: colabId,
-                    stage: 1,
-                    status: "Sem retorno",
-                    progress: "não iniciado"
+                json.forEach((item, idx) => {
+                    let assignedOperator = target;
+                    if(target === 'divide_equal') {
+                        assignedOperator = (operatorToggle === 0) ? 'cobranca_ludmila' : 'cobranca_lucas';
+                        operatorToggle = (operatorToggle === 0) ? 1 : 0;
+                    }
+
+                    let defaultDate = dateVal ? dateVal.split('-').reverse().join('/') : new Date().toLocaleDateString('pt-BR');
+                    let sheetDate = item['Data de Abertura'] || item['DATA DE ABERTURA'] || item['DATA'] || item['Data'] || defaultDate;
+
+                    let prioridadeVal = item['Prioridade de Atendimento'] || item['PRIORIDADE DE ATENDIMENTO'] || item['Prioridade'] || 'ATENDIMENTO NORMAL';
+                    let clienteVal = item['Nome do Cliente'] || item['NOME DO CLIENTE'] || item['NOME'] || item['Cliente'] || 'CLIENTE SEM NOME';
+                    let etapaVal = item['Etapa de Cobrança'] || item['ETAPA DE COBRANÇA'] || item['Etapa'] || item['ETAPA'] || 'Etapa 1';
+                    let slaVal = item['SLA / Prazo'] || item['SLA'] || item['PRAZO'] || item['Status SLA'] || 'NO PRAZO';
+
+                    dataset.push({
+                        id: Date.now() + idx,
+                        operator: assignedOperator,
+                        prioridade: prioridadeVal,
+                        dataAbertura: sheetDate,
+                        cliente: clienteVal,
+                        etapa: etapaVal,
+                        statusSLA: slaVal,
+                        modalidade: (item['MODALIDADE'] || item['Modalidade'] || 'caixa').toLowerCase(),
+                        contato: item['TELEFONE'] || item['CONTATO'] || item['Celular'] || '-',
+                        revertido: item['REVERTIDO'] || 'NÃO',
+                        finalizado: false
+                    });
                 });
+
+                alert(`Importação concluída com sucesso! ${json.length} registros inseridos.`);
+                closeModal('import-modal');
+                renderTable();
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function addNewColumn() {
+            const name = document.getElementById('new-col-name').value.trim();
+            const type = document.getElementById('new-col-type').value;
+
+            if(!name) {
+                alert('Por favor, digite o nome da coluna.');
+                return;
+            }
+
+            const colId = 'custom_' + Date.now();
+            const isFinance = currentOperator.startsWith('financeiro');
+            const targetArray = isFinance ? columnsConfig.financeiro : columnsConfig.cobranca;
+
+            targetArray.splice(targetArray.length - 1, 0, { id: colId, name: name, type: type });
+
+            document.getElementById('new-col-name').value = '';
+            closeModal('column-modal');
+            renderTable();
+        }
+
+        function generateDailyReport() {
+            const operatorData = dataset.filter(i => i.operator === currentOperator);
+            const total = operatorData.length;
+            const finalizados = operatorData.filter(i => i.finalizado).length;
+            const pendentes = total - finalizados;
+
+            let operatorName = 'Ludmila';
+            if(currentOperator === 'cobranca_lucas') operatorName = 'Lucas';
+            if(currentOperator === 'financeiro_lorena') operatorName = 'Lorena';
+
+            const dateToday = new Date().toLocaleDateString('pt-BR');
+
+            let report = `=========================================\n`;
+            report += `📊 RELATÓRIO DIÁRIO DE PERFORMANCE OPERACIONAL BI\n`;
+            report += `=========================================\n`;
+            report += `👤 OPERADOR(A): ${operatorName.toUpperCase()}\n`;
+            report += `📅 DATA DE EMISSÃO: ${dateToday}\n`;
+            report += `-----------------------------------------\n`;
+            report += `📈 RESUMO GERAL DE CARTEIRA:\n`;
+            report += `   • Total de Demandas: ${total}\n`;
+            report += `   • Concluídos / Revertidos: ${finalizados}\n`;
+            report += `   • Em Andamento / Pendentes: ${pendentes}\n`;
+            report += `   • Taxa de Conclusão: ${total > 0 ? Math.round((finalizados/total)*100) : 0}%\n`;
+            report += `-----------------------------------------\n`;
+            report += `📋 DETALHAMENTO DAS DEMANDAS:\n`;
+
+            operatorData.forEach((item, idx) => {
+                report += `${idx + 1}. ${item.cliente} | Etapa: ${item.etapa} | SLA: ${item.statusSLA} | [${item.finalizado ? 'CONCLUÍDO' : 'PENDENTE'}]\n`;
             });
 
-            salvarDatabase();
-            parsedCSVData = [];
-            document.getElementById('file-info').classList.add('hidden');
-            showToast("Demanda Atribuída!");
-            switchAdminTab('overview');
+            report += `=========================================\n`;
+            report += `CS DEV Enterprise System v3.6\n`;
+
+            document.getElementById('report-text').value = report;
+            openModal('report-modal');
         }
 
-        function exportarCSV() {
-            let csv = "data:text/csv;charset=utf-8,ID,Cliente,Telefone,Valor,ChavePIX,Etapa,Status,Progresso\n";
-            database.clients.forEach(c => {
-                csv += `${c.colabId},"${c.name}",${c.phone || ''},${c.value || 0},"${c.pixKey || ''}",Etapa ${c.stage},${c.status},${c.progress}\n`;
-            });
-            const link = document.createElement("a");
-            link.href = encodeURI(csv);
-            link.download = `relatorio_cobranca_${Date.now()}.csv`;
-            link.click();
+        function copyReportText() {
+            const copyText = document.getElementById('report-text');
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            alert('Relatório copiado para a área de transferência!');
         }
-
-        function salvarBlocoNotas() {
-            database.userNotes[currentUser.id] = document.getElementById('colab-notes').value;
-            salvarDatabase();
-        }
-
-        function abrirModalRelatorioUn(id) {
-            const c = database.clients.find(x => x.id === id);
-            if (!c) return;
-            const text = `📋 RELATÓRIO DE COBRANÇA\n-------------------------------\nCliente: ${c.name}\nTelefone: ${c.phone || 'N/I'}\nValor: R$ ${c.value}\nPIX: ${c.pixKey || 'Não cadastrada'}\nEtapa: Etapa ${c.stage}\nStatus: ${c.status}\nProgresso: ${c.progress.toUpperCase()}`;
-            document.getElementById('text-relatorio-un').innerText = text;
-            document.getElementById('modal-relatorio-un').classList.remove('hidden');
-        }
-        function fecharModalUn() { document.getElementById('modal-relatorio-un').classList.add('hidden'); }
-        function copiarTextoUn() { navigator.clipboard.writeText(document.getElementById('text-relatorio-un').innerText); showToast("Copiado!"); fecharModalUn(); }
-
-        function abrirModalRelatorioGeral() {
-            const list = database.clients.filter(c => c.colabId === currentUser.id);
-            let text = `📊 RELATÓRIO GERAL\n========================\nOperador: ${currentUser.name}\n\n`;
-            list.forEach((c, idx) => { text += `${idx + 1}. ${c.name} | R$ ${c.value} | Status: ${c.status}\n`; });
-            document.getElementById('text-relatorio-geral').innerText = text;
-            document.getElementById('modal-relatorio-geral').classList.remove('hidden');
-        }
-        function fecharModalGeral() { document.getElementById('modal-relatorio-geral').classList.add('hidden'); }
-        function copiarTextoGeral() { navigator.clipboard.writeText(document.getElementById('text-relatorio-geral').innerText); showToast("Relatório Copiado!"); fecharModalGeral(); }
     </script>
 </body>
 </html>
